@@ -96,7 +96,9 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   .user-name{display:none;}
   .month-badge{font-size:11px;padding:4px 10px;}
   .sync-indicator span{display:none;}
-  .grid-3{grid-template-columns:repeat(2,1fr);}
+  .grid-3{grid-template-columns:1fr;}
+  .budget-row{grid-template-columns:1fr 100px;}
+  .card-value{font-size:28px;}
 }
 .topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
 .logo{display:flex;align-items:center;gap:10px;cursor:pointer;}
@@ -923,7 +925,14 @@ async function loadBudget() {
     .eq('user_id', currentUser.id)
     .eq('mes_ref', getMesRef());
   state.budget = {};
-  if (data) data.forEach(b => { state.budget[b.categoria] = b.limite; });
+  if (data) data.forEach(b => {
+    if (b.categoria === '_renda') {
+      state.rendaLiquida = b.limite;
+      document.getElementById('rendaLiquida').value = b.limite || '';
+    } else {
+      state.budget[b.categoria] = b.limite;
+    }
+  });
 }
 
 async function loadDebts() {
@@ -1084,11 +1093,12 @@ async function processIA(source) {
         data: today,
         mes_ref: mesRef,
       }).select().single();
-      if (!error) {
-        state.transactions.unshift(data);
-        renderTransactions();
-        renderDashboard();
+      if (error) {
+        throw new Error('Erro ao salvar: ' + error.message);
       }
+      state.transactions.unshift(data);
+      renderTransactions();
+      renderDashboard();
       const icon = result.tipo === 'receita' ? '💰 Receita' : '💸 Despesa';
       respEl.innerHTML = `✅ <strong>${icon}</strong> de <strong>${fmt(result.valor)}</strong> em <strong>${result.categoria}</strong><br><em style="color:var(--gold-light);font-size:12px;">"${result.mensagem}"</em>`;
     }
@@ -1114,13 +1124,18 @@ async function processIA(source) {
 async function saveBudget() {
   setSyncing();
   const mesRef = getMesRef();
+  const renda = parseFloat(document.getElementById('rendaLiquida').value) || 0;
+  state.rendaLiquida = renda;
+  // Salva renda líquida numa linha especial de categoria '_renda'
   const rows = CATEGORIES.map(c => ({
     user_id: currentUser.id,
     mes_ref: mesRef,
     categoria: c.name,
     limite: state.budget[c.name] || 0,
   }));
-  await sb.from('budget').upsert(rows, { onConflict: 'user_id,mes_ref,categoria' });
+  rows.push({ user_id: currentUser.id, mes_ref: mesRef, categoria: '_renda', limite: renda });
+  const { error } = await sb.from('budget').upsert(rows, { onConflict: 'user_id,mes_ref,categoria' });
+  if (error) { toast('Erro ao salvar: ' + error.message, 'error'); setSynced(); return; }
   setSynced();
   toast('Orçamento salvo!', 'success');
   renderDashboard();
