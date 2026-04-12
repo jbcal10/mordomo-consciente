@@ -961,46 +961,29 @@ function setSyncing() { document.getElementById('syncStatus').textContent = 'Sal
 function setSynced() { document.getElementById('syncStatus').textContent = 'Sincronizado'; }
 
 // ============================================================
-// IA PROCESSING — Claude (Anthropic)
+// IA PROCESSING — Claude via Netlify Function (sem CORS)
 // ============================================================
-const CLAUDE_MODEL = 'claude-haiku-4-5-20251001'; // rápido e eficiente
-
 async function callClaude(systemPrompt, userPrompt) {
   let res;
   try {
-    res = await fetch('https://api.anthropic.com/v1/messages', {
+    res = await fetch('/.netlify/functions/ia', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': window.__CLAUDE_KEY || '',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-calls': 'true'
-      },
-      body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: 800,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system: systemPrompt, prompt: userPrompt })
     });
   } catch(netErr) {
-    throw new Error('Sem conexão com a IA. Verifique sua internet.');
-  }
-  if (!res.ok) {
-    const errBody = await res.json().catch(()=>({}));
-    const msg = errBody?.error?.message || ('Erro ' + res.status);
-    throw new Error('IA: ' + msg);
+    throw new Error('Sem conexão. Verifique sua internet.');
   }
   const d = await res.json();
-  const text = d.content?.[0]?.text || '';
+  if (!res.ok) throw new Error(d?.error || 'Erro ' + res.status);
+  const text = d.text || '';
   if (!text) throw new Error('IA não retornou resposta.');
-  // Extrai JSON mesmo que venha com texto ao redor
   const match = text.replace(/```json\s*/gi,'').replace(/```/g,'').trim().match(/\{[\s\S]*\}/);
   if (!match) throw new Error('Formato inválido na resposta da IA.');
   try {
     return JSON.parse(match[0]);
   } catch(e) {
-    throw new Error('Erro ao processar resposta da IA. Tente reformular.');
+    throw new Error('Erro ao processar resposta. Tente reformular.');
   }
 }
 
