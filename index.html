@@ -1489,7 +1489,7 @@ initAuth();
         box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         animation: slideUp 0.4s ease; max-width: 360px; width: calc(100% - 48px);
       `;
-      banner.innerHTML = \`
+      banner.innerHTML = `
         <div style="font-size:28px;">⚖️</div>
         <div style="flex:1;">
           <div style="font-size:14px;font-weight:600;color:#e8c97a;margin-bottom:2px;">Instalar Mordomo Consciente</div>
@@ -1499,7 +1499,7 @@ initAuth();
           <button onclick="triggerInstall()" style="background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:8px;padding:8px 14px;color:#0d0f14;font-weight:700;font-size:12px;cursor:pointer;">Instalar</button>
           <button onclick="hideInstallBanner()" style="background:transparent;border:1px solid #2a3044;border-radius:8px;padding:6px 14px;color:#7a8299;font-size:11px;cursor:pointer;">Agora não</button>
         </div>
-      \`;
+      `;
       document.body.appendChild(banner);
     }
 
@@ -1519,26 +1519,26 @@ initAuth();
 
     function showUpdateToast() {
       const el = document.createElement('div');
-      el.style.cssText = \`
+      el.style.cssText = `
         position:fixed;bottom:24px;right:24px;background:#161a22;
         border:1px solid rgba(201,168,76,0.4);border-radius:10px;
         padding:14px 18px;z-index:10001;font-size:13px;
         display:flex;align-items:center;gap:12px;
         box-shadow:0 8px 24px rgba(0,0,0,0.4);
-      \`;
-      el.innerHTML = \`
+      `;
+      el.innerHTML = `
         <span>🔄 Nova versão disponível</span>
         <button onclick="window.location.reload()" style="background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:6px;padding:6px 12px;color:#0d0f14;font-weight:700;font-size:12px;cursor:pointer;">Atualizar</button>
-      \`;
+      `;
       document.body.appendChild(el);
     }
 
     // CSS para animação do banner
     const style = document.createElement('style');
-    style.textContent = \`
+    style.textContent = `
       @keyframes slideUp { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
       @media (display-mode: standalone) { .pwa-only { display: flex !important; } .browser-only { display: none !important; } }
-    \`;
+    `;
     document.head.appendChild(style);
   </script>
 </body>
