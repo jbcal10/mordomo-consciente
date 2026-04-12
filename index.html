@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mordomo Consciente — Finanças com Fé</title>
+  <!-- PWA META TAGS -->
+  <meta name="theme-color" content="#c9a84c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mordomo">
+  <meta name="application-name" content="Mordomo Consciente">
+  <meta name="msapplication-TileColor" content="#0d0f14">
+  <meta name="msapplication-TileImage" content="icons/icon-144.png">
+  
+  <!-- PWA MANIFEST -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- APPLE ICONS -->
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+  
+  <!-- FAVICON -->
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-72.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg: #0d0f14;
+  --surface: #161a22;
+  --surface2: #1e2330;
+  --border: #2a3044;
+  --gold: #c9a84c;
+  --gold-light: #e8c97a;
+  --gold-dim: rgba(201,168,76,0.15);
+  --green: #4caf82;
+  --red: #e05c5c;
+  --blue: #5b8dee;
+  --text: #e8eaf0;
+  --text-muted: #7a8299;
+  --text-dim: #4a5168;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.4;}
+
+/* ====== AUTH SCREEN ====== */
+.auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;position:relative;}
+.auth-bg{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(201,168,76,0.06) 0%,transparent 60%),radial-gradient(ellipse at 70% 20%,rgba(91,141,238,0.04) 0%,transparent 50%);pointer-events:none;}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:48px 40px;width:100%;max-width:440px;position:relative;overflow:hidden;}
+.auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.auth-logo{text-align:center;margin-bottom:32px;}
+.auth-logo-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--gold),#8b6914);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px;}
+.auth-logo-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--gold-light);}
+.auth-logo-sub{font-size:12px;color:var(--text-muted);margin-top:4px;font-style:italic;}
+.auth-tabs{display:flex;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:28px;gap:4px;}
+.auth-tab{flex:1;text-align:center;padding:10px;border-radius:7px;font-size:14px;font-weight:500;cursor:pointer;color:var(--text-muted);transition:all 0.2s;}
+.auth-tab.active{background:var(--gold-dim);color:var(--gold-light);border:1px solid rgba(201,168,76,0.3);}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;display:block;}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:rgba(201,168,76,0.5);}
+.form-input::placeholder{color:var(--text-dim);}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:10px;padding:14px;color:#0d0f14;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:8px;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,0.3);}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.auth-error{background:rgba(224,92,92,0.12);border:1px solid rgba(224,92,92,0.3);color:var(--red);padding:10px 14px;border-radius:8px;font-size:13px;margin-top:12px;display:none;}
+.auth-error.show{display:block;}
+.auth-quote{text-align:center;font-size:12px;color:var(--text-dim);font-style:italic;margin-top:24px;line-height:1.5;}
+
+/* ====== SETUP SCREEN ====== */
+.setup-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;}
+.setup-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:540px;}
+.setup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.setup-step{font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.setup-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:4px;}
+.setup-sub{font-size:13px;color:var(--text-muted);margin-bottom:28px;}
+
+/* ====== APP ====== */
+.app{display:grid;grid-template-columns:240px 1fr;grid-template-rows:60px 1fr;min-height:100vh;}
+/* ── MOBILE ── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;backdrop-filter:blur(2px);}
+.sidebar-overlay.open{display:block;}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:4px 8px;margin-right:8px;}
+@media(max-width:768px){
+  .app{grid-template-columns:1fr;grid-template-rows:56px 1fr;}
+  .hamburger{display:flex;align-items:center;}
+  .sidebar{position:fixed;top:0;left:-260px;width:260px;height:100vh;z-index:200;transition:left 0.3s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding-top:64px;}
+  .sidebar.open{left:0;}
+  .main{max-height:calc(100vh - 56px);}
+  .topbar{padding:0 16px;}
+  .logo-sub{display:none;}
+  .user-name{display:none;}
+  .month-badge{font-size:11px;padding:4px 10px;}
+  .sync-indicator span{display:none;}
+  .grid-3{grid-template-columns:repeat(2,1fr);}
+}
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--gold),#8b6914);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.logo-text{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--gold-light);}
+.logo-sub{font-size:10px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.month-badge{background:var(--gold-dim);border:1px solid rgba(201,168,76,0.3);color:var(--gold-light);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;}
+.user-menu{display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 12px;border-radius:8px;transition:background 0.2s;position:relative;}
+.user-menu:hover{background:var(--surface2);}
+.avatar{width:32px;height:32px;background:linear-gradient(135deg,var(--blue),#3a5fc0);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+.user-name{font-size:13px;font-weight:500;}
+.dropdown{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px;min-width:160px;display:none;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+.dropdown.open{display:block;}
+.dropdown-item{padding:9px 12px;border-radius:7px;font-size:13px;cursor:pointer;color:var(--text-muted);transition:all 0.15s;}
+.dropdown-item:hover{background:var(--surface2);color:var(--text);}
+.dropdown-item.danger{color:var(--red);}
+
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;gap:2px;}
+.nav-section{padding:0 12px;margin-bottom:8px;}
+.nav-label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);padding:0 12px;margin-bottom:4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:all 0.2s;font-size:13px;color:var(--text-muted);border:1px solid transparent;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:var(--gold-dim);border-color:rgba(201,168,76,0.25);color:var(--gold-light);}
+.nav-icon{font-size:15px;width:20px;text-align:center;}
+.nav-divider{height:1px;background:var(--border);margin:8px 12px;}
+
+.main{padding:24px;overflow-y:auto;max-height:calc(100vh - 60px);}
+.page{display:none;animation:fadeIn 0.3s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.page-header{margin-bottom:24px;}
+.page-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:3px;}
+.page-subtitle{font-size:13px;color:var(--text-muted);font-style:italic;}
+
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;}
+.card-value{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;}
+.card-value.green{color:var(--green);}
+.card-value.red{color:var(--red);}
+.card-value.gold{color:var(--gold-light);}
+.card-sub{font-size:12px;color:var(--text-muted);margin-top:3px;}
+
+.section-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.section-title span{color:var(--text-muted);font-size:12px;font-family:'DM Sans',sans-serif;font-weight:400;}
+
+.ia-container{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:20px;position:relative;overflow:hidden;}
+.ia-container::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold),transparent);background-size:200%;animation:glow 3s ease infinite;}
+@keyframes glow{0%,100%{background-position:0%;}50%{background-position:100%;}}
+.ia-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ia-badge{background:var(--gold-dim);border:1px solid rgba(201,168,76,0.4);color:var(--gold-light);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.06em;}
+.ia-hint{font-size:13px;color:var(--text-muted);}
+.ia-input-row{display:flex;gap:10px;}
+.ia-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;resize:none;outline:none;transition:border-color 0.2s;}
+.ia-input:focus{border-color:rgba(201,168,76,0.5);}
+.ia-input::placeholder{color:var(--text-dim);}
+.ia-btn{background:linear-gradient(135deg,var(--gold),#8b6914);border:none;border-radius:10px;padding:12px 18px;color:#0d0f14;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.ia-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,168,76,0.3);}
+.ia-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.ia-response{margin-top:12px;padding:12px 14px;background:var(--surface2);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;font-size:13px;color:var(--text);line-height:1.6;display:none;animation:fadeIn 0.3s ease;}
+.ia-response.show{display:block;}
+.example-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.tag{background:var(--surface2);border:1px solid var(--border);padding:5px 11px;border-radius:20px;font-size:12px;color:var(--text-muted);cursor:pointer;transition:all 0.2s;}
+.tag:hover{border-color:rgba(201,168,76,0.4);color:var(--gold-light);}
+
+.cat-table{width:100%;border-collapse:collapse;}
+.cat-table th{text-align:left;padding:9px 12px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);}
+.cat-table td{padding:11px 12px;font-size:13px;border-bottom:1px solid rgba(42,48,68,0.4);vertical-align:middle;}
+.cat-table tr:last-child td{border-bottom:none;}
+.cat-table tr:hover td{background:rgba(255,255,255,0.015);}
+
+.progress-wrap{background:var(--border);border-radius:4px;height:5px;width:100px;overflow:hidden;}
+.progress-bar{height:100%;border-radius:4px;background:var(--green);transition:width 0.5s ease;}
+.progress-bar.warn{background:#e09c5c;}
+.progress-bar.danger{background:var(--red);}
+
+.status{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.status.ok{background:rgba(76,175,130,0.15);color:var(--green);}
+.status.warn{background:rgba(224,156,92,0.15);color:#e09c5c;}
+.status.danger{background:rgba(224,92,92,0.15);color:var(--red);}
+
+.tx-list{display:flex;flex-direction:column;gap:6px;}
+.tx-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--surface2);border-radius:9px;border:1px solid transparent;transition:all 0.2s;animation:fadeIn 0.3s ease;}
+.tx-item:hover{border-color:var(--border);}
+.tx-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.tx-icon.income{background:rgba(76,175,130,0.12);}
+.tx-icon.expense{background:rgba(224,92,92,0.1);}
+.tx-info{flex:1;}
+.tx-desc{font-size:13px;font-weight:500;}
+.tx-meta{font-size:11px;color:var(--text-muted);margin-top:1px;}
+.tx-amount{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;}
+.tx-amount.income{color:var(--green);}
+.tx-amount.expense{color:var(--red);}
+.tx-delete{width:28px;height:28px;border-radius:6px;border:none;background:transparent;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.15s;}
+.tx-delete:hover{background:rgba(224,92,92,0.15);color:var(--red);}
+
+.budget-row{display:grid;grid-template-columns:1fr 140px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(42,48,68,0.4);}
+.budget-row:last-child{border-bottom:none;}
+.budget-cat{font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;}
+.budget-pct{font-size:11px;color:var(--text-muted);background:var(--surface2);padding:2px 7px;border-radius:4px;}
+.budget-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;text-align:right;outline:none;transition:border-color 0.2s;width:100%;}
+.budget-input:focus{border-color:rgba(201,168,76,0.4);}
+
+.debt-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.debt-icon{width:38px;height:38px;background:rgba(224,92,92,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.debt-info{flex:1;}
+.debt-name{font-size:13px;font-weight:600;}
+.debt-meta{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.debt-values{text-align:right;}
+.debt-total{font-family:'Playfair Display',serif;font-size:17px;color:var(--red);font-weight:700;}
+.debt-parcela{font-size:11px;color:var(--text-muted);margin-top:1px;}
+
+.reserve-goal{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;}
+.reserve-goal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.reserve-goal-name{font-size:13px;font-weight:600;}
+.reserve-goal-val{font-family:'Playfair Display',serif;font-size:15px;color:var(--text-muted);}
+
+.thermo-item{background:var(--surface2);border-radius:10px;padding:14px;border:1px solid var(--border);margin-bottom:10px;}
+.thermo-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.thermo-name{font-size:13px;font-weight:500;}
+.thermo-desc{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.thermo-stars{display:flex;gap:3px;}
+.star{width:26px;height:26px;border-radius:5px;border:1px solid var(--border);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-dim);background:var(--surface);}
+.star.filled{background:var(--gold-dim);border-color:var(--gold);color:var(--gold-light);}
+.thermo-bar-wrap{background:var(--border);border-radius:3px;height:3px;}
+.thermo-bar{height:100%;border-radius:3px;background:var(--gold);transition:width 0.4s ease;}
+
+.score-circle{width:90px;height:90px;border-radius:50%;border:3px solid var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 12px;background:var(--gold-dim);}
+.score-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--gold-light);line-height:1;}
+.score-max{font-size:10px;color:var(--text-muted);}
+
+.scale-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(42,48,68,0.4);}
+.scale-row:last-child{border-bottom:none;}
+.scale-range{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--text-muted);width:38px;flex-shrink:0;}
+.scale-label{font-size:13px;font-weight:600;}
+.scale-desc{font-size:11px;color:var(--text-muted);margin-top:1px;}
+
+.quote-bar{text-align:center;padding:14px 18px;background:var(--gold-dim);border:1px solid rgba(201,168,76,0.2);border-radius:10px;font-style:italic;font-size:12px;color:var(--gold-light);margin-top:20px;line-height:1.5;}
+.empty{text-align:center;padding:36px 20px;color:var(--text-muted);}
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:0.5;}
+.empty-text{font-size:13px;}
+.spinner{width:14px;height:14px;border:2px solid rgba(0,0,0,0.3);border-top-color:#0d0f14;border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;z-index:10000;animation:fadeIn 0.3s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4);max-width:320px;}
+.toast.success{border-left:3px solid var(--green);}
+.toast.error{border-left:3px solid var(--red);}
+
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:16px;}
+.loading-logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold-light);}
+.loading-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;}
+
+.sync-indicator{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:6px;}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* PLANO BADGE */
+.plan-badge{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:2px 8px;border-radius:10px;}
+.plan-badge.gratuito{background:rgba(122,130,153,0.2);color:var(--text-muted);}
+.plan-badge.basic{background:var(--gold-dim);color:var(--gold-light);border:1px solid rgba(201,168,76,0.3);}
+.plan-badge.pro{background:rgba(91,141,238,0.15);color:var(--blue);border:1px solid rgba(91,141,238,0.3);}
+
+/* CONFIG SCREEN */
+.config-section{margin-bottom:28px;}
+.config-title{font-size:13px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-logo">Mordomo Consciente</div>
+</div>
+
+<!-- AUTH SCREEN -->
+<div class="auth-screen" id="authScreen" style="display:none;">
+  <div class="auth-bg"></div>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">⚖️</div>
+      <div class="auth-logo-title">Mordomo Consciente</div>
+      <div class="auth-logo-sub">Finanças com Fé, Propósito e Vida Real</div>
+    </div>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchTab('login')">Entrar</div>
+      <div class="auth-tab" onclick="switchTab('register')">Criar Conta</div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input type="password" class="form-input" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn-primary" onclick="doLogin()" id="loginBtn">Entrar na conta</button>
+      <div class="auth-error" id="loginError"></div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="registerForm" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Nome completo</label>
+        <input type="text" class="form-input" id="regNome" placeholder="Seu nome">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" class="form-input" id="regEmail" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input type="password" class="form-input" id="regPass" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter')doRegister()">
+      </div>
+      <button class="btn-primary" onclick="doRegister()" id="registerBtn">Criar minha conta</button>
+      <div class="auth-error" id="registerError"></div>
+    </div>
+
+    <div class="auth-quote">"Quem é fiel no mínimo também é fiel no muito." — Lucas 16:10</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="appScreen" style="display:none;">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:4px;">
+      <button class="hamburger" onclick="toggleSidebar()" id="hamburgerBtn">☰</button>
+      <div class="logo" onclick="goTo('dashboard')">
+        <div class="logo-icon">⚖️</div>
+        <div>
+          <div class="logo-text">Mordomo Consciente</div>
+          <div class="logo-sub">Finanças com Fé e Propósito</div>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="sync-indicator"><div class="sync-dot"></div><span id="syncStatus">Sincronizado</span></div>
+      <div class="month-badge" id="currentMonth">📅 Março 2026</div>
+      <div class="user-menu" onclick="toggleDropdown()">
+        <div class="avatar" id="userAvatar">?</div>
+        <div class="user-name" id="userName">Usuário</div>
+        <div class="dropdown" id="userDropdown">
+          <div class="dropdown-item" onclick="goTo('config')">⚙️ Configurações</div>
+          <div class="dropdown-item danger" onclick="doLogout()">🚪 Sair</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+  <nav class="sidebar" id="sidebarNav">
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <div class="nav-item active" onclick="goTo('dashboard')" data-page="dashboard"><span class="nav-icon">🏠</span>Dashboard</div>
+      <div class="nav-item" onclick="goTo('lancamentos')" data-page="lancamentos"><span class="nav-icon">📅</span>Lançamentos</div>
+      <div class="nav-item" onclick="goTo('orcamento')" data-page="orcamento"><span class="nav-icon">📊</span>Orçamento</div>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-section">
+      <div class="nav-label">Controle</div>
+      <div class="nav-item" onclick="goTo('dividas')" data-page="dividas"><span class="nav-icon">💳</span>Dívidas</div>
+      <div class="nav-item" onclick="goTo('reserva')" data-page="reserva"><span class="nav-icon">🏦</span>Reserva</div>
+      <div class="nav-item" onclick="goTo('termometro')" data-page="termometro"><span class="nav-icon">🌡️</span>Termômetro</div>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-section">
+      <div class="nav-label">IA Mordomo</div>
+      <div class="nav-item" onclick="goTo('ia')" data-page="ia"><span class="nav-icon">✨</span>Lançar por Texto</div>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-title">Dashboard</div>
+        <div class="page-subtitle">"Quem é fiel no mínimo também é fiel no muito." — Lucas 16:10</div>
+      </div>
+      <div class="ia-container">
+        <div class="ia-header"><div class="ia-badge">✨ IA MORDOMO</div><div class="ia-hint">Diga um gasto ou receita em linguagem natural</div></div>
+        <div class="ia-input-row">
+          <textarea class="ia-input" id="dashInput" placeholder='"Gastei 85 reais no mercado hoje" ou "Recebi 3500 de salário"' rows="2"></textarea>
+          <button class="ia-btn" onclick="processIA('dash')" id="dashBtn"><span id="dashBtnText">⚡ Registrar</span></button>
+        </div>
+        <div class="example-tags">
+          <div class="tag" onclick="setInput('dashInput','Gastei 85 reais no supermercado hoje')">🛒 Mercado</div>
+          <div class="tag" onclick="setInput('dashInput','Recebi 3500 reais de salário')">💰 Salário</div>
+          <div class="tag" onclick="setInput('dashInput','Paguei 1200 de aluguel')">🏠 Aluguel</div>
+          <div class="tag" onclick="setInput('dashInput','Dízimo de 350 reais na igreja')">⛪ Dízimo</div>
+        </div>
+        <div class="ia-response" id="dashResponse"></div>
+      </div>
+      <div class="grid-3" style="margin-bottom:18px;">
+        <div class="card"><div class="card-title">💰 Receitas do Mês</div><div class="card-value green" id="totalIncome">R$ 0,00</div><div class="card-sub" id="incomeCount">0 lançamentos</div></div>
+        <div class="card"><div class="card-title">💸 Gastos do Mês</div><div class="card-value red" id="totalExpense">R$ 0,00</div><div class="card-sub" id="expenseCount">0 lançamentos</div></div>
+        <div class="card"><div class="card-title">⚖️ Saldo</div><div class="card-value gold" id="totalBalance">R$ 0,00</div><div class="card-sub">Receitas − Gastos</div></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Gastos por Categoria</div>
+        <table class="cat-table"><thead><tr><th>Categoria</th><th>Orçado</th><th>Gasto</th><th>Saldo</th><th>%</th><th>Situação</th></tr></thead>
+        <tbody id="dashCatTable"><tr><td colspan="6"><div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Lance transações para ver o resumo</div></div></td></tr></tbody></table>
+      </div>
+      <div class="quote-bar">"Os planos bem elaborados trazem lucro." — Provérbios 21:5</div>
+    </div>
+
+    <!-- LANÇAMENTOS -->
+    <div class="page" id="page-lancamentos">
+      <div class="page-header"><div class="page-title">📅 Lançamentos</div><div class="page-subtitle">Registre cada entrada e saída. Seja fiel no mínimo.</div></div>
+      <div class="ia-container">
+        <div class="ia-header"><div class="ia-badge">✨ IA MORDOMO</div><div class="ia-hint">Descreva seu gasto ou receita</div></div>
+        <div class="ia-input-row">
+          <textarea class="ia-input" id="txInput" placeholder='"Paguei 200 de conta de luz" ou "Recebi 800 de freela"' rows="2"></textarea>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <button id="voiceTxBtn" onclick="startVoice('txInput')" title="Gravar por voz" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:44px;height:44px;cursor:pointer;font-size:20px;color:var(--gold-light);display:flex;align-items:center;justify-content:center;">🎙️</button>
+            <button class="ia-btn" onclick="processIA('tx')" id="txBtn" style="flex:1;"><span id="txBtnText">⚡</span></button>
+          </div>
+        </div>
+        <div class="ia-response" id="txResponse"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Histórico <span id="txCountLabel">carregando...</span></div>
+        <div class="tx-list" id="txList"><div class="empty"><div class="empty-icon">📝</div><div class="empty-text">Carregando lançamentos...</div></div></div>
+      </div>
+    </div>
+
+    <!-- ORÇAMENTO -->
+    <div class="page" id="page-orcamento">
+      <div class="page-header"><div class="page-title">📊 Orçamento Base Zero</div><div class="page-subtitle">Todo real deve ter destino antes de sair da conta.</div></div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-title">💰 Renda Líquida do Mês (R$)</div>
+        <input type="number" class="budget-input" id="rendaLiquida" placeholder="0,00" style="width:200px;font-size:18px;padding:10px;margin-top:4px;" oninput="calcBudget()">
+      </div>
+      <div class="card">
+        <div class="section-title">Limites por Categoria</div>
+        <div id="budgetForm"></div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-size:13px;font-weight:600;">Total Alocado</span>
+            <span id="totalAllocated" style="font-family:'Playfair Display',serif;font-size:18px;color:var(--gold-light);">R$ 0,00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;font-weight:600;">Sobra / Déficit</span>
+            <span id="budgetDiff" style="font-family:'Playfair Display',serif;font-size:18px;">R$ 0,00</span>
+          </div>
+        </div>
+        <button class="ia-btn" onclick="saveBudget()" style="margin-top:14px;width:100%;">💾 Salvar Orçamento</button>
+      </div>
+      <div class="quote-bar" style="margin-top:14px;">💡 ORÇAMENTO BASE ZERO: Se sobrar, aumente reserva ou dízimo. Se faltar, revise lazer e alimentação primeiro.</div>
+    </div>
+
+    <!-- DÍVIDAS -->
+    <div class="page" id="page-dividas">
+      <div class="page-header"><div class="page-title">💳 Mapa de Dívidas</div><div class="page-subtitle">O que tem nome pode ser enfrentado. Liste tudo — sem julgamento.</div></div>
+      <div class="ia-container">
+        <div class="ia-header"><div class="ia-badge">✨ IA MORDOMO</div><div class="ia-hint">Descreva uma dívida</div></div>
+        <div class="ia-input-row">
+          <textarea class="ia-input" id="debtInput" placeholder='"Devo 3000 no cartão Nubank com juros de 12% ao mês, parcela de 500"' rows="2"></textarea>
+          <button class="ia-btn" onclick="processIA('debt')" id="debtBtn"><span id="debtBtnText">⚡ Registrar</span></button>
+        </div>
+        <div class="ia-response" id="debtResponse"></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:14px;">
+        <div class="card"><div class="card-title">Total da Dívida</div><div class="card-value red" id="totalDebt">R$ 0,00</div></div>
+        <div class="card"><div class="card-title">Parcelas Mensais</div><div class="card-value" id="totalParcelas">R$ 0,00</div></div>
+      </div>
+      <div class="card"><div class="section-title">Mapa de Dívidas</div><div id="debtList"><div class="empty"><div class="empty-icon">✅</div><div class="empty-text">Nenhuma dívida registrada.</div></div></div></div>
+      <div class="quote-bar">"O que toma emprestado é escravo do que empresta." — Provérbios 22:7</div>
+    </div>
+
+    <!-- RESERVA -->
+    <div class="page" id="page-reserva">
+      <div class="page-header"><div class="page-title">🏦 Reserva de Emergência</div><div class="page-subtitle">Guarda parte no verão para o inverno que vai chegar.</div></div>
+      <div class="grid-2" style="margin-bottom:14px;">
+        <div class="card"><div class="card-title">Despesas Essenciais/Mês (R$)</div><input type="number" class="budget-input" id="despesasEssenciais" placeholder="0,00" oninput="saveReservaConfig()"><button class="ia-btn" onclick="saveReservaConfig()" style="margin-top:8px;padding:8px 14px;font-size:12px;">💾 Salvar</button></div>
+        <div class="card"><div class="card-title">Reserva Atual (R$)</div><input type="number" class="budget-input" id="reservaAtual" placeholder="0,00"><button class="ia-btn" onclick="saveReservaConfig()" style="margin-top:8px;padding:8px 14px;font-size:12px;">💾 Salvar</button></div>
+      </div>
+      <div class="card" style="margin-bottom:14px;"><div class="section-title">Metas de Reserva</div><div id="reserveGoals"></div></div>
+      <div class="card">
+        <div class="section-title">Evolução Mensal</div>
+        <table class="cat-table"><thead><tr><th>Mês</th><th>Depositado (R$)</th><th>Saldo Acumulado (R$)</th></tr></thead><tbody id="reserveTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- TERMÔMETRO -->
+    <div class="page" id="page-termometro">
+      <div class="page-header"><div class="page-title">🌡️ Termômetro de Mordomia</div><div class="page-subtitle">Responda com honestidade. Pontuação de 0 a 5 em cada dimensão.</div></div>
+      <div class="grid-2">
+        <div class="card" style="text-align:center;">
+          <div class="score-circle"><div class="score-num" id="scoreNum">0</div><div class="score-max">de 25</div></div>
+          <div id="scoreLevelBadge" style="margin-bottom:16px;"><span class="status danger">🔴 CRÍTICO</span></div>
+          <div class="scale-row"><div class="scale-range" style="color:#e05c5c;">0–4</div><div><div class="scale-label" style="color:#e05c5c;">🔴 CRÍTICO</div><div class="scale-desc">Começa pela aba Lançamentos.</div></div></div>
+          <div class="scale-row"><div class="scale-range" style="color:#e09c5c;">5–9</div><div><div class="scale-label" style="color:#e09c5c;">🟠 ALERTA</div><div class="scale-desc">Define o orçamento esta semana.</div></div></div>
+          <div class="scale-row"><div class="scale-range" style="color:#e8c97a;">10–14</div><div><div class="scale-label" style="color:#e8c97a;">🟡 PROGRESSO</div><div class="scale-desc">Foca em reserva e dívidas.</div></div></div>
+          <div class="scale-row"><div class="scale-range" style="color:#4caf82;">15–19</div><div><div class="scale-label" style="color:#4caf82;">✅ GOVERNO</div><div class="scale-desc">Aprofunda generosidade.</div></div></div>
+          <div class="scale-row"><div class="scale-range" style="color:#5b8dee;">20–25</div><div><div class="scale-label" style="color:#5b8dee;">🏆 EXCELÊNCIA</div><div class="scale-desc">Ensina quem está ao redor.</div></div></div>
+        </div>
+        <div><div id="thermoGrid"></div></div>
+      </div>
+    </div>
+
+    <!-- IA -->
+    <div class="page" id="page-ia">
+      <div class="page-header"><div class="page-title">✨ IA Mordomo — Lançar por Texto</div><div class="page-subtitle">Fale naturalmente. A IA interpreta, categoriza e registra automaticamente.</div></div>
+      <div class="ia-container">
+        <div class="ia-header"><div class="ia-badge">✨ IA MORDOMO ATIVO</div><div class="ia-hint">Sem formulários. Só escreva como falaria para um amigo.</div></div>
+        <div class="ia-input-row">
+          <textarea class="ia-input" id="iaInput" placeholder='Exemplos:&#10;"Gastei 85 reais no mercado hoje"&#10;"Recebi 3500 de salário no dia 5"&#10;"Paguei 200 de conta de luz e internet"' rows="4"></textarea>
+          <button class="ia-btn" onclick="processIA('ia')" id="iaBtn"><span id="iaBtnText">⚡ Registrar</span></button>
+        </div>
+        <div class="example-tags">
+          <div class="tag" onclick="setInput('iaInput','Gastei 85 reais no supermercado hoje')">🛒 Supermercado R$85</div>
+          <div class="tag" onclick="setInput('iaInput','Recebi 3500 reais de salário')">💰 Salário R$3.500</div>
+          <div class="tag" onclick="setInput('iaInput','Paguei 1200 de aluguel')">🏠 Aluguel R$1.200</div>
+          <div class="tag" onclick="setInput('iaInput','Dízimo de 350 reais na igreja')">⛪ Dízimo R$350</div>
+          <div class="tag" onclick="setInput('iaInput','Parcela do carro 800 reais')">🚗 Carro R$800</div>
+          <div class="tag" onclick="setInput('iaInput','Plano de saúde 280 reais')">💊 Saúde R$280</div>
+        </div>
+        <div class="ia-response" id="iaResponse"></div>
+      </div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="page" id="page-config">
+      <div class="page-header"><div class="page-title">⚙️ Configurações</div><div class="page-subtitle">Gerencie sua conta e preferências.</div></div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="config-title">Perfil</div>
+        <div class="form-group"><label class="form-label">Nome</label><input type="text" class="form-input" id="configNome" placeholder="Seu nome"></div>
+        <div class="form-group"><label class="form-label">E-mail</label><input type="email" class="form-input" id="configEmail" disabled style="opacity:0.5;cursor:not-allowed;"></div>
+        <button class="ia-btn" onclick="saveProfile()" style="margin-top:4px;width:auto;padding:10px 20px;">💾 Salvar Perfil</button>
+      </div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="config-title">Plano Atual</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:15px;font-weight:600;" id="configPlano">Gratuito</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">30 lançamentos/mês</div>
+          </div>
+          <button class="ia-btn" style="width:auto;padding:10px 20px;">⭐ Fazer Upgrade</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="config-title" style="color:var(--red);">Zona de Perigo</div>
+        <button onclick="doLogout()" style="background:rgba(224,92,92,0.12);border:1px solid rgba(224,92,92,0.3);color:var(--red);padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">🚪 Sair da Conta</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ============================================================
+// CONFIGURAÇÃO SUPABASE
+// ============================================================
+// Credenciais hardcoded (anon key JWT correta)
+const _DEFAULT_URL = 'https://vhulkkndgqauxuadtuzl.supabase.co';
+const _DEFAULT_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodWxra25kZ3FhdXh1YWR0dXpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNDE5NzUsImV4cCI6MjA4OTcxNzk3NX0.hdHntcKR4RGqN024Zg9xC9P9tWaH8MiMajsjg_qiQmw';
+
+// Prioridade: localStorage (setup screen) > hardcoded
+const _savedUrl = localStorage.getItem('mc_supabase_url');
+const _savedKey = localStorage.getItem('mc_supabase_key');
+
+// Limpa chaves inválidas (formato antigo sb_publishable_)
+if (_savedKey && !_savedKey.startsWith('eyJ')) {
+  localStorage.removeItem('mc_supabase_url');
+  localStorage.removeItem('mc_supabase_key');
+}
+
+const _validSavedUrl = _savedUrl && _savedUrl.startsWith('https://');
+const _validSavedKey = _savedKey && _savedKey.startsWith('eyJ') && _savedKey.length > 20;
+
+let SUPABASE_URL = _validSavedUrl ? _savedUrl : _DEFAULT_URL;
+let SUPABASE_KEY = _validSavedKey ? _savedKey : _DEFAULT_KEY;
+
+// Configurado se tiver URL e key JWT válidos
+const SUPABASE_CONFIGURED =
+  SUPABASE_URL.startsWith('https://') &&
+  SUPABASE_KEY.startsWith('eyJ') &&
+  SUPABASE_KEY.length > 20;
+
+const sb = SUPABASE_CONFIGURED
+  ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  : null;
+
+// ============================================================
+// ESTADO GLOBAL
+// ============================================================
+let currentUser = null;
+let currentProfile = null;
+let state = {
+  transactions: [],
+  budget: {},
+  debts: [],
+  thermo: [0,0,0,0,0],
+  despesasEssenciais: 0,
+  reservaAtual: 0,
+  renda: 0,
+  reserva: []
+};
+
+const CATEGORIES = [
+  { name:'Moradia', icon:'🏠', pct:'25–35%' },
+  { name:'Alimentação', icon:'🛒', pct:'15–20%' },
+  { name:'Transporte', icon:'🚗', pct:'10–15%' },
+  { name:'Saúde', icon:'💊', pct:'5–10%' },
+  { name:'Educação', icon:'📚', pct:'5–10%' },
+  { name:'Lazer', icon:'🎉', pct:'5–10%' },
+  { name:'Vestuário', icon:'👕', pct:'3–5%' },
+  { name:'Dízimo/Oferta', icon:'⛪', pct:'10%' },
+  { name:'Reserva', icon:'🏦', pct:'10%' },
+  { name:'Outros', icon:'📦', pct:'—' },
+];
+
+const THERMO_DIMS = [
+  { name:'1. Consciência Financeira', desc:'Você sabe para onde vai cada real?', tip:'Registre gastos por 7 dias antes de pontuar.' },
+  { name:'2. Planejamento e Orçamento', desc:'Você define destino para cada real antes de gastar?', tip:'Preencha a aba Orçamento todo dia 1.' },
+  { name:'3. Controle de Dívidas', desc:'Você sabe o total exato do que deve?', tip:'Liste todas as dívidas na aba Dívidas.' },
+  { name:'4. Reserva de Emergência', desc:'Você tem pelo menos 1 mês de despesas guardado?', tip:'Separe pelo menos 10% da renda antes de qualquer gasto.' },
+  { name:'5. Generosidade Estruturada', desc:'Você doa com alegria e dentro do planejamento?', tip:'Coloque generosidade como categoria fixa no orçamento.' },
+];
+
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+const getMesRef = () => {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+};
+
+// ============================================================
+// AUTH
+// ============================================================
+async function initAuth() {
+  // Se Supabase não foi configurado, mostra tela de setup
+  if (!SUPABASE_CONFIGURED) {
+    showSetupScreen();
+    return;
+  }
+
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      await bootApp(session.user);
+    } else {
+      showAuth();
+    }
+
+    sb.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) await bootApp(session.user);
+      if (event === 'SIGNED_OUT') showAuth();
+    });
+  } catch (err) {
+    console.error('[Auth] Erro:', err);
+    showSetupScreen('Credenciais inválidas. Verifique a URL e a chave do Supabase.');
+  }
+}
+
+function showSetupScreen(errorMsg) {
+  document.getElementById('loadingOverlay').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'none';
+
+  // Cria tela de setup dinamicamente se não existir
+  let setup = document.getElementById('setupScreen');
+  if (!setup) {
+    setup = document.createElement('div');
+    setup.id = 'setupScreen';
+    setup.style.cssText = 'min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;';
+    setup.innerHTML = `
+      <div style="background:#161a22;border:1px solid #2a3044;border-radius:20px;padding:40px;width:100%;max-width:480px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);"></div>
+        
+        <div style="text-align:center;margin-bottom:28px;">
+          <div style="width:52px;height:52px;background:linear-gradient(135deg,#c9a84c,#8b6914);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;">⚖️</div>
+          <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#e8c97a;">Configurar Mordomo</div>
+          <div style="font-size:13px;color:#7a8299;margin-top:4px;">Cole suas credenciais do Supabase para ativar o sistema</div>
+        </div>
+
+        <div id="setupError" style="background:rgba(224,92,92,0.12);border:1px solid rgba(224,92,92,0.3);color:#e05c5c;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:${errorMsg ? 'block' : 'none'};">${errorMsg || ''}</div>
+
+        <div style="margin-bottom:14px;">
+          <label style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#7a8299;display:block;margin-bottom:6px;">Project URL</label>
+          <input id="setupUrl" type="text" placeholder="https://xxxxxxxxxxxxxxxx.supabase.co"
+            style="width:100%;background:#1e2330;border:1px solid #2a3044;border-radius:10px;padding:12px 14px;color:#e8eaf0;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#7a8299;display:block;margin-bottom:6px;">Anon Public Key</label>
+          <input id="setupKey" type="text" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            style="width:100%;background:#1e2330;border:1px solid #2a3044;border-radius:10px;padding:12px 14px;color:#e8eaf0;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+        </div>
+
+        <button onclick="applySetup()" style="width:100%;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:10px;padding:14px;color:#0d0f14;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">⚡ Conectar e Entrar</button>
+
+        <div style="margin-top:20px;background:#1e2330;border-radius:10px;padding:14px;">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#4a5168;margin-bottom:8px;">Como encontrar as credenciais</div>
+          <div style="font-size:12px;color:#7a8299;line-height:1.7;">
+            1. Acesse <strong style="color:#e8c97a;">supabase.com</strong> e entre no seu projeto<br>
+            2. Clique em <strong style="color:#e8c97a;">Project Settings → API</strong><br>
+            3. Copie a <strong style="color:#e8c97a;">Project URL</strong> e a <strong style="color:#e8c97a;">anon public key</strong>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:20px;font-style:italic;font-size:12px;color:rgba(201,168,76,0.5);">"Quem é fiel no mínimo também é fiel no muito." — Lucas 16:10</div>
+      </div>
+    `;
+    document.body.appendChild(setup);
+  } else {
+    setup.style.display = 'flex';
+    if (errorMsg) {
+      const errEl = document.getElementById('setupError');
+      if (errEl) { errEl.textContent = errorMsg; errEl.style.display = 'block'; }
+    }
+  }
+}
+
+async function applySetup() {
+  const url = document.getElementById('setupUrl').value.trim();
+  const key = document.getElementById('setupKey').value.trim();
+  const errEl = document.getElementById('setupError');
+
+  if (!url.startsWith('https://') || key.length < 20) {
+    errEl.textContent = 'Preencha corretamente os dois campos.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Salva nas credenciais via reload com query params (solução sem servidor)
+  // Para uso local/Netlify, o usuário deve editar o HTML
+  // Aqui testamos a conexão dinamicamente
+  try {
+    errEl.style.display = 'none';
+    const testClient = supabase.createClient(url, key);
+    const { error } = await testClient.auth.getSession();
+    if (error) throw error;
+
+    // Salva no localStorage para persistir
+    localStorage.setItem('mc_supabase_url', url);
+    localStorage.setItem('mc_supabase_key', key);
+    
+    // Recarrega a página — agora vai pegar do localStorage
+    window.location.reload();
+  } catch(e) {
+    errEl.textContent = 'Não foi possível conectar. Verifique se as credenciais estão corretas.';
+    errEl.style.display = 'block';
+  }
+}
+
+function showAuth() {
+  document.getElementById('loadingOverlay').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('appScreen').style.display = 'none';
+}
+
+async function bootApp(user) {
+  currentUser = user;
+  document.getElementById('authScreen').style.display = 'none';
+
+  // Load profile
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  currentProfile = profile;
+
+  const nome = profile?.nome || user.email.split('@')[0];
+  document.getElementById('userName').textContent = nome;
+  document.getElementById('userAvatar').textContent = nome.charAt(0).toUpperCase();
+  document.getElementById('configNome').value = nome;
+  document.getElementById('configEmail').value = user.email;
+  document.getElementById('configPlano').textContent = (profile?.plano || 'gratuito').charAt(0).toUpperCase() + (profile?.plano || 'gratuito').slice(1);
+
+  const now = new Date();
+  document.getElementById('currentMonth').textContent = `📅 ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+
+  // Load all data
+  await Promise.all([
+    loadTransactions(),
+    loadBudget(),
+    loadDebts(),
+    loadThermo(),
+    loadReservaConfig(),
+    loadReserva(),
+  ]);
+
+  renderAll();
+  renderBudgetForm();
+  renderThermo();
+  renderReserva();
+
+  document.getElementById('loadingOverlay').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'grid';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1)));
+  document.getElementById('loginForm').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab==='register' ? 'block' : 'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginError');
+  err.classList.remove('show');
+  btn.disabled = true;
+  btn.textContent = 'Entrando...';
+
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) {
+    err.textContent = error.message === 'Invalid login credentials' ? 'E-mail ou senha incorretos.' : error.message;
+    err.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Entrar na conta';
+  }
+}
+
+async function doRegister() {
+  const nome = document.getElementById('regNome').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass = document.getElementById('regPass').value;
+  const btn = document.getElementById('registerBtn');
+  const err = document.getElementById('registerError');
+  err.classList.remove('show');
+
+  if (!nome || !email || pass.length < 6) {
+    err.textContent = 'Preencha todos os campos. Senha mínima: 6 caracteres.';
+    err.classList.add('show');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Criando conta...';
+
+  const { error } = await sb.auth.signUp({ email, password: pass, options: { data: { nome } } });
+  if (error) {
+    err.textContent = error.message;
+    err.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Criar minha conta';
+  } else {
+    err.style.color = 'var(--green)';
+    err.textContent = '✅ Conta criada! Verifique seu e-mail para confirmar.';
+    err.classList.add('show');
+    btn.textContent = 'Conta criada!';
+  }
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  showAuth();
+}
+
+async function saveProfile() {
+  const nome = document.getElementById('configNome').value.trim();
+  await sb.from('profiles').upsert({ id: currentUser.id, nome });
+  document.getElementById('userName').textContent = nome;
+  document.getElementById('userAvatar').textContent = nome.charAt(0).toUpperCase();
+  toast('Perfil salvo!', 'success');
+}
+
+// ============================================================
+// DATA LOADING
+// ============================================================
+async function loadTransactions() {
+  const mesRef = getMesRef();
+  const { data } = await sb.from('transactions').select('*')
+    .eq('user_id', currentUser.id)
+    .eq('mes_ref', mesRef)
+    .order('created_at', { ascending: false });
+  state.transactions = data || [];
+}
+
+async function loadBudget() {
+  const { data } = await sb.from('budget').select('*')
+    .eq('user_id', currentUser.id)
+    .eq('mes_ref', getMesRef());
+  state.budget = {};
+  if (data) data.forEach(b => { state.budget[b.categoria] = b.limite; });
+}
+
+async function loadDebts() {
+  const { data } = await sb.from('debts').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  state.debts = data || [];
+}
+
+async function loadThermo() {
+  const { data } = await sb.from('thermometer').select('*').eq('user_id', currentUser.id).single();
+  if (data) state.thermo = [data.consciencia, data.planejamento, data.dividas, data.reserva, data.generosidade];
+}
+
+async function loadReservaConfig() {
+  const { data } = await sb.from('reserva_config').select('*').eq('user_id', currentUser.id).single();
+  if (data) {
+    state.despesasEssenciais = data.despesas_essenciais;
+    state.reservaAtual = data.reserva_atual;
+    document.getElementById('despesasEssenciais').value = data.despesas_essenciais || '';
+    document.getElementById('reservaAtual').value = data.reserva_atual || '';
+  }
+}
+
+async function loadReserva() {
+  const { data } = await sb.from('reserva').select('*')
+    .eq('user_id', currentUser.id)
+    .eq('ano', new Date().getFullYear())
+    .order('id');
+  state.reserva = data || [];
+}
+
+// ============================================================
+// SYNC STATUS
+// ============================================================
+function setSyncing() { document.getElementById('syncStatus').textContent = 'Salvando...'; }
+function setSynced() { document.getElementById('syncStatus').textContent = 'Sincronizado'; }
+
+// ============================================================
+// IA PROCESSING — Google Gemini
+// ============================================================
+const GEMINI_KEY = 'AIzaSyAMVH8zqAvtzT_Yw8Pi7HWoaHHlI0QMFHk';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+
+async function callGemini(systemPrompt, userPrompt, tentativa = 1) {
+  let res;
+  try {
+    res = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: systemPrompt + '\n\nEntrada do usuário: ' + userPrompt }] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 800 }
+      })
+    });
+  } catch(netErr) {
+    if (res.status === 429 && tentativa < 3) {
+      await new Promise(r => setTimeout(r, 2000 * tentativa));
+      return callGemini(systemPrompt, userPrompt, tentativa + 1);
+    }
+    throw new Error('Gemini erro ' + res.status + '. Tente novamente.');
+  }
+  if (!res.ok) {
+    const errBody = await res.text().catch(()=>'');
+    throw new Error('Gemini erro ' + res.status + '. Tente novamente.');
+  }
+  const d = await res.json();
+  // Verifica se foi bloqueado por safety filters
+  if (d.candidates?.[0]?.finishReason === 'SAFETY') {
+    throw new Error('Conteúdo bloqueado pelo filtro de segurança.');
+  }
+  const text = d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  if (!text) {
+    const reason = d.candidates?.[0]?.finishReason || 'desconhecido';
+    throw new Error('IA não retornou texto (motivo: ' + reason + ')');
+  }
+  // Extrai JSON de dentro da resposta (ignora markdown ou texto ao redor)
+  const clean = text.replace(/```json\s*/gi,'').replace(/```/g,'').trim();
+  const match = clean.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('Formato inválido na resposta da IA.');
+  try {
+    return JSON.parse(match[0]);
+  } catch(parseErr) {
+    throw new Error('Erro ao processar resposta da IA. Tente reformular.');
+  }
+}
+
+async function callIA(prompt) {
+  return callGemini(
+    `Você é o Mordomo Consciente, assistente de finanças pessoais com valores cristãos.
+Ao receber uma descrição de transação financeira em linguagem natural, extraia e retorne APENAS um JSON válido:
+{"tipo":"receita" ou "despesa","valor":número,"categoria":"Moradia|Alimentação|Transporte|Saúde|Educação|Lazer|Vestuário|Dízimo/Oferta|Reserva|Outros","descricao":"descrição curta max 40 chars","forma_pagto":"Dinheiro|Cartão Crédito|Cartão Débito|Pix|Transferência|Outro","data":"DD/MM/YYYY use data de hoje se não informado","mensagem":"frase encorajadora cristã max 80 chars"}
+Responda APENAS com JSON puro, sem markdown, sem texto adicional.`,
+    prompt
+  );
+}
+
+async function callDebtIA(prompt) {
+  return callGemini(
+    `Você é o Mordomo Consciente. Ao receber descrição de dívida, retorne APENAS JSON puro:
+{"credor":"nome do credor","saldo":número total da dívida,"juros":percentual ao mês como número,"parcela":valor mensal como número,"prazo":meses como número,"prioridade":"Alta|Média|Baixa","mensagem":"frase motivacional cristã max 80 chars"}
+Responda APENAS com JSON puro, sem markdown.`,
+    prompt
+  );
+}
+
+// ── VOZ: Web Speech API ───────────────────────────────────
+function startVoice(targetId) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    toast('Seu navegador não suporta gravação de voz. Use Chrome.', 'error');
+    return;
+  }
+  const btn = document.getElementById('voiceTxBtn');
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'pt-BR';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  btn.textContent = '🔴';
+  recognition.start();
+  recognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    document.getElementById(targetId).value = transcript;
+    btn.textContent = '🎙️';
+    toast('Voz capturada! Clique em Registrar.', 'success');
+  };
+  recognition.onerror = (e) => {
+    btn.textContent = '🎙️';
+    toast('Erro ao capturar voz: ' + e.error, 'error');
+  };
+  recognition.onend = () => { btn.textContent = '🎙️'; };
+}
+
+async function processIA(source) {
+  const map = {
+    dash:{inp:'dashInput',btn:'dashBtn',txt:'dashBtnText',resp:'dashResponse'},
+    tx:  {inp:'txInput',  btn:'txBtn',  txt:'txBtnText',  resp:'txResponse'},
+    ia:  {inp:'iaInput',  btn:'iaBtn',  txt:'iaBtnText',  resp:'iaResponse'},
+    debt:{inp:'debtInput',btn:'debtBtn',txt:'debtBtnText',resp:'debtResponse'},
+  };
+  const m = map[source];
+  const inputEl = document.getElementById(m.inp);
+  const btnEl = document.getElementById(m.btn);
+  const txtEl = document.getElementById(m.txt);
+  const respEl = document.getElementById(m.resp);
+  const text = inputEl.value.trim();
+  if (!text) return;
+
+  btnEl.disabled = true;
+  txtEl.innerHTML = '<span class="spinner"></span>';
+  respEl.classList.remove('show');
+  setSyncing();
+
+  try {
+    if (source === 'debt') {
+      const result = await callDebtIA(text);
+      const { data, error } = await sb.from('debts').insert({
+        user_id: currentUser.id,
+        credor: result.credor,
+        saldo: result.saldo,
+        juros: result.juros,
+        parcela: result.parcela,
+        prazo: result.prazo,
+        prioridade: result.prioridade,
+      }).select().single();
+      if (!error) {
+        state.debts.unshift(data);
+        renderDebts();
+      }
+      respEl.innerHTML = `✅ <strong>${result.credor}</strong> registrado — Saldo: ${fmt(result.saldo)}<br><em style="color:var(--gold-light);font-size:12px;">"${result.mensagem}"</em>`;
+    } else {
+      const result = await callIA(text);
+      const mesRef = getMesRef();
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await sb.from('transactions').insert({
+        user_id: currentUser.id,
+        tipo: result.tipo,
+        valor: result.valor,
+        categoria: result.categoria,
+        descricao: result.descricao,
+        forma_pagto: result.forma_pagto,
+        data: today,
+        mes_ref: mesRef,
+      }).select().single();
+      if (!error) {
+        state.transactions.unshift(data);
+        renderTransactions();
+        renderDashboard();
+      }
+      const icon = result.tipo === 'receita' ? '💰 Receita' : '💸 Despesa';
+      respEl.innerHTML = `✅ <strong>${icon}</strong> de <strong>${fmt(result.valor)}</strong> em <strong>${result.categoria}</strong><br><em style="color:var(--gold-light);font-size:12px;">"${result.mensagem}"</em>`;
+    }
+    respEl.classList.add('show');
+    inputEl.value = '';
+    setSynced();
+    toast('Lançamento salvo!', 'success');
+  } catch(e) {
+    console.error('Erro processIA:', e);
+    const msg = e.message && e.message.length < 200 ? e.message : 'Tente ser mais específico.';
+    respEl.innerHTML = '⚠️ Erro: ' + msg;
+    respEl.classList.add('show');
+    setSynced();
+  }
+
+  btnEl.disabled = false;
+  txtEl.textContent = '⚡ Registrar';
+}
+
+// ============================================================
+// SAVE FUNCTIONS
+// ============================================================
+async function saveBudget() {
+  setSyncing();
+  const mesRef = getMesRef();
+  const rows = CATEGORIES.map(c => ({
+    user_id: currentUser.id,
+    mes_ref: mesRef,
+    categoria: c.name,
+    limite: state.budget[c.name] || 0,
+  }));
+  await sb.from('budget').upsert(rows, { onConflict: 'user_id,mes_ref,categoria' });
+  setSynced();
+  toast('Orçamento salvo!', 'success');
+  renderDashboard();
+}
+
+async function saveReservaConfig() {
+  const desp = parseFloat(document.getElementById('despesasEssenciais').value) || 0;
+  const atual = parseFloat(document.getElementById('reservaAtual').value) || 0;
+  state.despesasEssenciais = desp;
+  state.reservaAtual = atual;
+  setSyncing();
+  await sb.from('reserva_config').upsert({ user_id: currentUser.id, despesas_essenciais: desp, reserva_atual: atual }, { onConflict: 'user_id' });
+  setSynced();
+  renderReserva();
+}
+
+async function saveThermo() {
+  setSyncing();
+  await sb.from('thermometer').upsert({
+    user_id: currentUser.id,
+    consciencia: state.thermo[0],
+    planejamento: state.thermo[1],
+    dividas: state.thermo[2],
+    reserva: state.thermo[3],
+    generosidade: state.thermo[4],
+  }, { onConflict: 'user_id' });
+  setSynced();
+}
+
+async function deleteTransaction(id) {
+  await sb.from('transactions').delete().eq('id', id);
+  state.transactions = state.transactions.filter(t => t.id !== id);
+  renderTransactions();
+  renderDashboard();
+  toast('Lançamento removido.', 'success');
+}
+
+async function deleteDebt(id) {
+  await sb.from('debts').delete().eq('id', id);
+  state.debts = state.debts.filter(d => d.id !== id);
+  renderDebts();
+  toast('Dívida removida.', 'success');
+}
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+const fmt = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+function renderAll() { renderDashboard(); renderTransactions(); renderDebts(); }
+
+function renderDashboard() {
+  const income = state.transactions.filter(t=>t.tipo==='receita').reduce((s,t)=>s+t.valor,0);
+  const expense = state.transactions.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+t.valor,0);
+  const balance = income - expense;
+
+  document.getElementById('totalIncome').textContent = fmt(income);
+  document.getElementById('totalExpense').textContent = fmt(expense);
+  document.getElementById('totalBalance').textContent = fmt(balance);
+  document.getElementById('totalBalance').className = 'card-value ' + (balance >= 0 ? 'green' : 'red');
+  document.getElementById('incomeCount').textContent = state.transactions.filter(t=>t.tipo==='receita').length + ' lançamentos';
+  document.getElementById('expenseCount').textContent = state.transactions.filter(t=>t.tipo==='despesa').length + ' lançamentos';
+
+  const spentByCat = {};
+  state.transactions.filter(t=>t.tipo==='despesa').forEach(t=>{ spentByCat[t.categoria]=(spentByCat[t.categoria]||0)+t.valor; });
+
+  const rows = CATEGORIES.map(cat => {
+    const spent = spentByCat[cat.name]||0;
+    const budgeted = state.budget[cat.name]||0;
+    if (spent===0 && budgeted===0) return '';
+    const saldo = budgeted - spent;
+    const pct = budgeted>0 ? Math.min((spent/budgeted)*100,100) : 0;
+    const cls = pct>100 ? 'danger' : pct>80 ? 'warn' : 'ok';
+    const lbl = pct>100 ? '🔴 Ultrapassado' : pct>80 ? '⚠️ Atenção' : '✅ OK';
+    return `<tr>
+      <td><strong>${cat.icon} ${cat.name}</strong></td>
+      <td>${fmt(budgeted)}</td><td>${fmt(spent)}</td>
+      <td style="color:${saldo<0?'var(--red)':'var(--green)'}">${fmt(saldo)}</td>
+      <td><div class="progress-wrap"><div class="progress-bar ${cls}" style="width:${pct}%"></div></div></td>
+      <td><span class="status ${cls}">${lbl}</span></td>
+    </tr>`;
+  }).filter(Boolean).join('');
+
+  document.getElementById('dashCatTable').innerHTML = rows || `<tr><td colspan="6"><div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Lance transações para ver o resumo</div></div></td></tr>`;
+}
+
+const getCatIcon = cat => ({Moradia:'🏠',Alimentação:'🛒',Transporte:'🚗',Saúde:'💊',Educação:'📚',Lazer:'🎉',Vestuário:'👕','Dízimo/Oferta':'⛪',Reserva:'🏦',Outros:'📦'})[cat]||'💸';
+
+function renderTransactions() {
+  const list = document.getElementById('txList');
+  document.getElementById('txCountLabel').textContent = state.transactions.length + ' transações';
+  if (!state.transactions.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">Nenhum lançamento ainda.</div></div>';
+    return;
+  }
+  list.innerHTML = state.transactions.map(t => `
+    <div class="tx-item">
+      <div class="tx-icon ${t.tipo}">${t.tipo==='receita'?'💰':getCatIcon(t.categoria)}</div>
+      <div class="tx-info">
+        <div class="tx-desc">${t.descricao||t.categoria}</div>
+        <div class="tx-meta">${t.categoria} · ${t.forma_pagto||'—'} · ${t.data||''}</div>
+      </div>
+      <div class="tx-amount ${t.tipo}">${t.tipo==='receita'?'+':'−'}${fmt(t.valor)}</div>
+      <button class="tx-delete" onclick="deleteTransaction('${t.id}')" title="Remover">🗑</button>
+    </div>
+  `).join('');
+}
+
+function renderBudgetForm() {
+  const renda = parseFloat(document.getElementById('rendaLiquida').value)||0;
+  document.getElementById('budgetForm').innerHTML = CATEGORIES.map(cat => `
+    <div class="budget-row">
+      <div class="budget-cat">${cat.icon} ${cat.name} <span class="budget-pct">${cat.pct}</span></div>
+      <input type="number" class="budget-input" placeholder="0,00"
+        value="${state.budget[cat.name]||''}"
+        oninput="state.budget['${cat.name}']=parseFloat(this.value)||0;calcBudget();">
+    </div>
+  `).join('');
+  calcBudget();
+}
+
+function calcBudget() {
+  const renda = parseFloat(document.getElementById('rendaLiquida').value)||0;
+  state.renda = renda;
+  const total = Object.values(state.budget).reduce((s,v)=>s+v,0);
+  const diff = renda - total;
+  document.getElementById('totalAllocated').textContent = fmt(total);
+  const el = document.getElementById('budgetDiff');
+  el.textContent = fmt(diff);
+  el.style.color = diff===0 ? 'var(--green)' : diff<0 ? 'var(--red)' : 'var(--gold-light)';
+}
+
+function renderDebts() {
+  const totalDebt = state.debts.reduce((s,d)=>s+d.saldo,0);
+  const totalParcelas = state.debts.reduce((s,d)=>s+d.parcela,0);
+  document.getElementById('totalDebt').textContent = fmt(totalDebt);
+  document.getElementById('totalParcelas').textContent = fmt(totalParcelas);
+  const list = document.getElementById('debtList');
+  if (!state.debts.length) { list.innerHTML = '<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">Nenhuma dívida registrada. Que ótimo!</div></div>'; return; }
+  const prioColor = {Alta:'var(--red)',Média:'#e09c5c',Baixa:'var(--green)'};
+  list.innerHTML = state.debts.map(d => `
+    <div class="debt-item">
+      <div class="debt-icon">💳</div>
+      <div class="debt-info">
+        <div class="debt-name">${d.credor}</div>
+        <div class="debt-meta">Juros: ${d.juros}%/mês · Prazo: ${d.prazo||'—'} meses · Prioridade: <span style="color:${prioColor[d.prioridade]}">${d.prioridade}</span></div>
+      </div>
+      <div class="debt-values">
+        <div class="debt-total">${fmt(d.saldo)}</div>
+        <div class="debt-parcela">Parcela: ${fmt(d.parcela)}/mês</div>
+      </div>
+      <button class="tx-delete" onclick="deleteDebt('${d.id}')" title="Remover">🗑</button>
+    </div>
+  `).join('');
+}
+
+function renderReserva() {
+  const desp = state.despesasEssenciais;
+  const atual = state.reservaAtual;
+  const goals = [
+    {name:'🎯 Meta Inicial',desc:'1 mês de despesas',mult:1},
+    {name:'🛡️ Meta Intermediária',desc:'3 meses',mult:3},
+    {name:'🏆 Meta Sólida',desc:'6 meses — à la José',mult:6},
+  ];
+  document.getElementById('reserveGoals').innerHTML = goals.map(g => {
+    const needed = desp * g.mult;
+    const falta = Math.max(0, needed - atual);
+    const pct = needed>0 ? Math.min((atual/needed)*100,100) : 0;
+    const reached = atual >= needed && needed > 0;
+    return `<div class="reserve-goal">
+      <div class="reserve-goal-top">
+        <div><div class="reserve-goal-name">${g.name}</div><div style="font-size:11px;color:var(--text-muted);margin-top:1px;">${g.desc}</div></div>
+        <div class="reserve-goal-val">${fmt(needed)}</div>
+      </div>
+      <div class="progress-wrap" style="width:100%;height:7px;margin-bottom:6px;"><div class="progress-bar" style="width:${pct}%;background:${reached?'var(--green)':'var(--gold)'}"></div></div>
+      <div style="font-size:11px;color:${reached?'var(--green)':'var(--text-muted)'};">${reached?'✅ Meta atingida!':'Falta: '+fmt(falta)}</div>
+    </div>`;
+  }).join('');
+
+  const mesesFilled = {};
+  state.reserva.forEach(r => { mesesFilled[r.mes] = r; });
+  document.getElementById('reserveTable').innerHTML = MONTHS.map((m,i) => {
+    const r = mesesFilled[m] || {};
+    return `<tr>
+      <td>${m}</td>
+      <td><input type="number" class="budget-input" style="width:130px" placeholder="0,00"
+        value="${r.depositado||''}"
+        onchange="saveReservaMes('${m}',this.value)"></td>
+      <td style="color:var(--text-muted);">${fmt(r.saldo_acumulado||0)}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function saveReservaMes(mes, valor) {
+  const ano = new Date().getFullYear();
+  const depositado = parseFloat(valor)||0;
+  const idx = MONTHS.indexOf(mes);
+  let acumulado = depositado;
+  if (idx > 0) {
+    const prev = state.reserva.find(r => r.mes === MONTHS[idx-1]);
+    if (prev) acumulado = (prev.saldo_acumulado||0) + depositado;
+  }
+  setSyncing();
+  const { data } = await sb.from('reserva').upsert({
+    user_id: currentUser.id, mes, ano, depositado, saldo_acumulado: acumulado
+  }, { onConflict: 'user_id,mes,ano' }).select().single();
+  if (data) {
+    const existing = state.reserva.findIndex(r=>r.mes===mes);
+    if (existing>=0) state.reserva[existing] = data; else state.reserva.push(data);
+  }
+  setSynced();
+  renderReserva();
+}
+
+function renderThermo() {
+  document.getElementById('thermoGrid').innerHTML = THERMO_DIMS.map((d,i) => {
+    const val = state.thermo[i];
+    return `<div class="thermo-item">
+      <div class="thermo-top">
+        <div><div class="thermo-name">${d.name}</div><div class="thermo-desc">${d.desc}</div></div>
+        <div class="thermo-stars">${[1,2,3,4,5].map(n=>`<div class="star ${val>=n?'filled':''}" onclick="setThermo(${i},${n})">${n}</div>`).join('')}</div>
+      </div>
+      <div class="thermo-bar-wrap"><div class="thermo-bar" style="width:${(val/5)*100}%"></div></div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:5px;">💡 ${d.tip}</div>
+    </div>`;
+  }).join('');
+}
+
+async function setThermo(dim, val) {
+  state.thermo[dim] = val;
+  const total = state.thermo.reduce((s,v)=>s+v,0);
+  document.getElementById('scoreNum').textContent = total;
+  let level,cls;
+  if(total<=4){level='🔴 CRÍTICO';cls='danger';}
+  else if(total<=9){level='🟠 ALERTA';cls='warn';}
+  else if(total<=14){level='🟡 PROGRESSO';cls='warn';}
+  else if(total<=19){level='✅ GOVERNO';cls='ok';}
+  else{level='🏆 EXCELÊNCIA';cls='ok';}
+  document.getElementById('scoreLevelBadge').innerHTML = `<span class="status ${cls}">${level}</span>`;
+  renderThermo();
+  await saveThermo();
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  closeSidebar();
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page)?.classList.add('active');
+  document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+  document.getElementById('userDropdown').classList.remove('open');
+}
+
+function toggleSidebar(){
+  const nav = document.getElementById('sidebarNav');
+  const overlay = document.getElementById('sidebarOverlay');
+  nav.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+function closeSidebar(){
+  const nav = document.getElementById('sidebarNav');
+  const overlay = document.getElementById('sidebarOverlay');
+  nav.classList.remove('open');
+  overlay.classList.remove('open');
+}
+function toggleDropdown() {
+  document.getElementById('userDropdown').classList.toggle('open');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.user-menu')) document.getElementById('userDropdown').classList.remove('open');
+});
+
+// ============================================================
+// HELPERS
+// ============================================================
+function setInput(id, val) { document.getElementById(id).value = val; }
+
+function toast(msg, type='success') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 3000);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+initAuth();
+</script>
+
+  <!-- ============================================================ -->
+  <!-- SERVICE WORKER REGISTRATION                                   -->
+  <!-- ============================================================ -->
+  <script>
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        try {
+          const reg = await navigator.serviceWorker.register('sw.js');
+          console.log('[PWA] Service Worker registrado:', reg.scope);
+          
+          // Verifica atualizações
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                showUpdateToast();
+              }
+            });
+          });
+        } catch (err) {
+          console.warn('[PWA] SW falhou:', err);
+        }
+      });
+    }
+
+    // ============================================================
+    // INSTALL PROMPT (Adicionar à tela inicial)
+    // ============================================================
+    let deferredPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // Mostra banner de instalação após 5 segundos
+      setTimeout(showInstallBanner, 5000);
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      hideInstallBanner();
+      console.log('[PWA] App instalado com sucesso!');
+    });
+
+    function showInstallBanner() {
+      if (!deferredPrompt) return;
+      const existing = document.getElementById('installBanner');
+      if (existing) return;
+
+      const banner = document.createElement('div');
+      banner.id = 'installBanner';
+      banner.style.cssText = `
+        position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+        background: #161a22; border: 1px solid rgba(201,168,76,0.4);
+        border-radius: 14px; padding: 16px 20px; z-index: 10001;
+        display: flex; align-items: center; gap: 14px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        animation: slideUp 0.4s ease; max-width: 360px; width: calc(100% - 48px);
+      `;
+      banner.innerHTML = \`
+        <div style="font-size:28px;">⚖️</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;color:#e8c97a;margin-bottom:2px;">Instalar Mordomo Consciente</div>
+          <div style="font-size:12px;color:#7a8299;">Adicione à sua tela inicial — funciona offline</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button onclick="triggerInstall()" style="background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:8px;padding:8px 14px;color:#0d0f14;font-weight:700;font-size:12px;cursor:pointer;">Instalar</button>
+          <button onclick="hideInstallBanner()" style="background:transparent;border:1px solid #2a3044;border-radius:8px;padding:6px 14px;color:#7a8299;font-size:11px;cursor:pointer;">Agora não</button>
+        </div>
+      \`;
+      document.body.appendChild(banner);
+    }
+
+    function hideInstallBanner() {
+      const b = document.getElementById('installBanner');
+      if (b) b.remove();
+    }
+
+    async function triggerInstall() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log('[PWA] Usuário escolheu:', outcome);
+      deferredPrompt = null;
+      hideInstallBanner();
+    }
+
+    function showUpdateToast() {
+      const el = document.createElement('div');
+      el.style.cssText = \`
+        position:fixed;bottom:24px;right:24px;background:#161a22;
+        border:1px solid rgba(201,168,76,0.4);border-radius:10px;
+        padding:14px 18px;z-index:10001;font-size:13px;
+        display:flex;align-items:center;gap:12px;
+        box-shadow:0 8px 24px rgba(0,0,0,0.4);
+      \`;
+      el.innerHTML = \`
+        <span>🔄 Nova versão disponível</span>
+        <button onclick="window.location.reload()" style="background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:6px;padding:6px 12px;color:#0d0f14;font-weight:700;font-size:12px;cursor:pointer;">Atualizar</button>
+      \`;
+      document.body.appendChild(el);
+    }
+
+    // CSS para animação do banner
+    const style = document.createElement('style');
+    style.textContent = \`
+      @keyframes slideUp { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+      @media (display-mode: standalone) { .pwa-only { display: flex !important; } .browser-only { display: none !important; } }
+    \`;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

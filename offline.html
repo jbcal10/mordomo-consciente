@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mordomo Consciente — Sem conexão</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d0f14;
+    color: #e8eaf0;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+  .container { max-width: 340px; }
+  .icon {
+    font-size: 64px;
+    margin-bottom: 24px;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: #e8c97a;
+    margin-bottom: 12px;
+  }
+  p {
+    font-size: 14px;
+    color: #7a8299;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+  .btn {
+    background: linear-gradient(135deg, #c9a84c, #8b6914);
+    border: none;
+    border-radius: 10px;
+    padding: 14px 28px;
+    color: #0d0f14;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .quote {
+    margin-top: 32px;
+    font-style: italic;
+    font-size: 13px;
+    color: rgba(201,168,76,0.6);
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">⚖️</div>
+    <h1>Você está offline</h1>
+    <p>Parece que sua conexão está indisponível no momento. Verifique sua internet e tente novamente.</p>
+    <button class="btn" onclick="window.location.reload()">↻ Tentar novamente</button>
+    <div class="quote">"O coração do homem planeja, o Senhor dirige os passos." — Provérbios 16:9</div>
+  </div>
+</body>
+</html>
