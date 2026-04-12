@@ -934,16 +934,16 @@ async function callGemini(systemPrompt, userPrompt, tentativa = 1) {
         generationConfig: { temperature: 0.1, maxOutputTokens: 800 }
       })
     });
-  } catch(netErr) {
+  } } catch(netErr) {
+    throw new Error('Sem conexão com a IA. Verifique sua internet.');
+  }
+  if (!res.ok) {
     if (res.status === 429 && tentativa < 3) {
-      await new Promise(r => setTimeout(r, 2000 * tentativa));
+      await new Promise(r => setTimeout(r, 2500 * tentativa));
       return callGemini(systemPrompt, userPrompt, tentativa + 1);
     }
     throw new Error('Gemini erro ' + res.status + '. Tente novamente.');
   }
-  if (!res.ok) {
-    const errBody = await res.text().catch(()=>'');
-    throw new Error('Gemini erro ' + res.status + '. Tente novamente.');
   }
   const d = await res.json();
   // Verifica se foi bloqueado por safety filters
