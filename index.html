@@ -537,6 +537,16 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <button class="ia-btn" onclick="saveProfile()" style="margin-top:4px;width:auto;padding:10px 20px;">💾 Salvar Perfil</button>
       </div>
       <div class="card" style="margin-bottom:14px;">
+        <div class="config-title">✨ IA Mordomo — Claude API Key</div>
+        <div class="form-group">
+          <label class="form-label">API Key (sk-ant-...)</label>
+          <input type="password" class="form-input" id="configClaudeKey" placeholder="sk-ant-api03-..." oninput="this.dataset.changed='1'">
+          <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Obtenha sua key gratuita em <strong style="color:var(--gold-light)">console.anthropic.com</strong> → API Keys</div>
+        </div>
+        <button class="ia-btn" onclick="saveClaudeKey()" style="margin-top:4px;width:auto;padding:10px 20px;">💾 Salvar Key da IA</button>
+        <div id="claudeKeyStatus" style="font-size:12px;margin-top:8px;color:var(--green);display:none;">✅ Key salva com sucesso!</div>
+      </div>
+      <div class="card" style="margin-bottom:14px;">
         <div class="config-title">Plano Atual</div>
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <div>
@@ -588,6 +598,13 @@ const SUPABASE_CONFIGURED =
 const sb = SUPABASE_CONFIGURED
   ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
   : null;
+
+// ── CLAUDE API KEY ──────────────────────────────────────────
+const _CLAUDE_KEY_DEFAULT = 'COLE_SUA_CLAUDE_KEY_AQUI';
+const _savedClaudeKey = localStorage.getItem('mc_claude_key');
+window.__CLAUDE_KEY = (_savedClaudeKey && _savedClaudeKey.startsWith('sk-ant-')) 
+  ? _savedClaudeKey 
+  : _CLAUDE_KEY_DEFAULT;
 
 // ============================================================
 // ESTADO GLOBAL
@@ -696,6 +713,12 @@ function showSetupScreen(errorMsg) {
             style="width:100%;background:#1e2330;border:1px solid #2a3044;border-radius:10px;padding:12px 14px;color:#e8eaf0;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
         </div>
 
+        <div style="margin-bottom:16px;">
+          <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#7a8299;margin-bottom:6px;">CLAUDE API KEY (IA Mordomo)</div>
+          <input id="setupClaudeKey" type="password" placeholder="sk-ant-api03-..." 
+            style="width:100%;background:#0d0f14;border:1px solid #2a3044;border-radius:10px;padding:12px 14px;color:#e8eaf0;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;">
+          <div style="font-size:11px;color:#4a5168;margin-top:4px;">Opcional agora — necessário para usar a IA. Obtenha em console.anthropic.com</div>
+        </div>
         <button onclick="applySetup()" style="width:100%;background:linear-gradient(135deg,#c9a84c,#8b6914);border:none;border-radius:10px;padding:14px;color:#0d0f14;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">⚡ Conectar e Entrar</button>
 
         <div style="margin-top:20px;background:#1e2330;border-radius:10px;padding:14px;">
@@ -743,6 +766,11 @@ async function applySetup() {
     // Salva no localStorage para persistir
     localStorage.setItem('mc_supabase_url', url);
     localStorage.setItem('mc_supabase_key', key);
+    const claudeKey = document.getElementById('setupClaudeKey')?.value?.trim();
+    if (claudeKey && claudeKey.startsWith('sk-ant-')) {
+      localStorage.setItem('mc_claude_key', claudeKey);
+      window.__CLAUDE_KEY = claudeKey;
+    }
     
     // Recarrega a página — agora vai pegar do localStorage
     window.location.reload();
@@ -770,6 +798,8 @@ async function bootApp(user) {
   document.getElementById('userName').textContent = nome;
   document.getElementById('userAvatar').textContent = nome.charAt(0).toUpperCase();
   document.getElementById('configNome').value = nome;
+  const _ck = localStorage.getItem('mc_claude_key') || '';
+  if (_ck) document.getElementById('configClaudeKey').value = _ck;
   document.getElementById('configEmail').value = user.email;
   document.getElementById('configPlano').textContent = (profile?.plano || 'gratuito').charAt(0).toUpperCase() + (profile?.plano || 'gratuito').slice(1);
 
@@ -855,6 +885,19 @@ async function doLogout() {
   showAuth();
 }
 
+function saveClaudeKey() {
+  const key = document.getElementById('configClaudeKey').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    alert('Key inválida. Deve começar com sk-ant-');
+    return;
+  }
+  localStorage.setItem('mc_claude_key', key);
+  window.__CLAUDE_KEY = key;
+  const status = document.getElementById('claudeKeyStatus');
+  status.style.display = 'block';
+  setTimeout(() => status.style.display = 'none', 3000);
+}
+
 async function saveProfile() {
   const nome = document.getElementById('configNome').value.trim();
   await sb.from('profiles').upsert({ id: currentUser.id, nome });
@@ -918,56 +961,51 @@ function setSyncing() { document.getElementById('syncStatus').textContent = 'Sal
 function setSynced() { document.getElementById('syncStatus').textContent = 'Sincronizado'; }
 
 // ============================================================
-// IA PROCESSING — Google Gemini
+// IA PROCESSING — Claude (Anthropic)
 // ============================================================
-const GEMINI_KEY = 'AIzaSyAMVH8zqAvtzT_Yw8Pi7HWoaHHlI0QMFHk';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+const CLAUDE_MODEL = 'claude-haiku-4-5-20251001'; // rápido e eficiente
 
-async function callGemini(systemPrompt, userPrompt, tentativa = 1) {
+async function callClaude(systemPrompt, userPrompt) {
   let res;
   try {
-    res = await fetch(GEMINI_URL, {
+    res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': window.__CLAUDE_KEY || '',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-calls': 'true'
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: systemPrompt + '\n\nEntrada do usuário: ' + userPrompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 800 }
+        model: CLAUDE_MODEL,
+        max_tokens: 800,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
       })
     });
-  } } catch(netErr) {
+  } catch(netErr) {
     throw new Error('Sem conexão com a IA. Verifique sua internet.');
   }
   if (!res.ok) {
-    if (res.status === 429 && tentativa < 3) {
-      await new Promise(r => setTimeout(r, 2500 * tentativa));
-      return callGemini(systemPrompt, userPrompt, tentativa + 1);
-    }
-    throw new Error('Gemini erro ' + res.status + '. Tente novamente.');
-  }
+    const errBody = await res.json().catch(()=>({}));
+    const msg = errBody?.error?.message || ('Erro ' + res.status);
+    throw new Error('IA: ' + msg);
   }
   const d = await res.json();
-  // Verifica se foi bloqueado por safety filters
-  if (d.candidates?.[0]?.finishReason === 'SAFETY') {
-    throw new Error('Conteúdo bloqueado pelo filtro de segurança.');
-  }
-  const text = d.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  if (!text) {
-    const reason = d.candidates?.[0]?.finishReason || 'desconhecido';
-    throw new Error('IA não retornou texto (motivo: ' + reason + ')');
-  }
-  // Extrai JSON de dentro da resposta (ignora markdown ou texto ao redor)
-  const clean = text.replace(/```json\s*/gi,'').replace(/```/g,'').trim();
-  const match = clean.match(/\{[\s\S]*\}/);
+  const text = d.content?.[0]?.text || '';
+  if (!text) throw new Error('IA não retornou resposta.');
+  // Extrai JSON mesmo que venha com texto ao redor
+  const match = text.replace(/```json\s*/gi,'').replace(/```/g,'').trim().match(/\{[\s\S]*\}/);
   if (!match) throw new Error('Formato inválido na resposta da IA.');
   try {
     return JSON.parse(match[0]);
-  } catch(parseErr) {
+  } catch(e) {
     throw new Error('Erro ao processar resposta da IA. Tente reformular.');
   }
 }
 
 async function callIA(prompt) {
-  return callGemini(
+  return callClaude(
     `Você é o Mordomo Consciente, assistente de finanças pessoais com valores cristãos.
 Ao receber uma descrição de transação financeira em linguagem natural, extraia e retorne APENAS um JSON válido:
 {"tipo":"receita" ou "despesa","valor":número,"categoria":"Moradia|Alimentação|Transporte|Saúde|Educação|Lazer|Vestuário|Dízimo/Oferta|Reserva|Outros","descricao":"descrição curta max 40 chars","forma_pagto":"Dinheiro|Cartão Crédito|Cartão Débito|Pix|Transferência|Outro","data":"DD/MM/YYYY use data de hoje se não informado","mensagem":"frase encorajadora cristã max 80 chars"}
@@ -977,7 +1015,7 @@ Responda APENAS com JSON puro, sem markdown, sem texto adicional.`,
 }
 
 async function callDebtIA(prompt) {
-  return callGemini(
+  return callClaude(
     `Você é o Mordomo Consciente. Ao receber descrição de dívida, retorne APENAS JSON puro:
 {"credor":"nome do credor","saldo":número total da dívida,"juros":percentual ao mês como número,"parcela":valor mensal como número,"prazo":meses como número,"prioridade":"Alta|Média|Baixa","mensagem":"frase motivacional cristã max 80 chars"}
 Responda APENAS com JSON puro, sem markdown.`,
