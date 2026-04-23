@@ -90,15 +90,39 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   .hamburger{display:flex;align-items:center;}
   .sidebar{position:fixed;top:0;left:-260px;width:260px;height:100vh;z-index:200;transition:left 0.3s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding-top:64px;}
   .sidebar.open{left:0;}
-  .main{max-height:calc(100vh - 56px);}
-  .topbar{padding:0 16px;}
+  .main{max-height:calc(100vh - 56px);padding:16px;}
+  .topbar{padding:0 12px;}
   .logo-sub{display:none;}
+  .logo-text{font-size:15px;}
   .user-name{display:none;}
-  .month-badge{font-size:11px;padding:4px 10px;}
+  .month-badge{font-size:11px;padding:4px 8px;}
   .sync-indicator span{display:none;}
-  .grid-3{grid-template-columns:1fr;}
-  .budget-row{grid-template-columns:1fr 100px;}
-  .card-value{font-size:28px;}
+  .sync-indicator .sync-dot{display:none;}
+  /* Cards dashboard em coluna única */
+  .grid-3{grid-template-columns:1fr !important;}
+  .grid-2{grid-template-columns:1fr !important;}
+  .card-value{font-size:24px;}
+  /* Orçamento */
+  .budget-row{grid-template-columns:1fr 90px;gap:6px;}
+  .budget-input{font-size:13px;padding:6px 8px;}
+  /* Tabela de gastos por categoria */
+  .dash-table{font-size:12px;}
+  .dash-table th, .dash-table td{padding:6px 4px;}
+  /* IA container */
+  .ia-container{padding:14px;}
+  .ia-input{font-size:14px;}
+  .ia-btn{padding:10px 12px;font-size:13px;}
+  .ia-input-row{gap:6px;}
+  /* Transações */
+  .tx-item{padding:10px 12px;}
+  .tx-amount{font-size:14px;}
+  /* Cards genéricos */
+  .card{padding:16px;}
+  .card-title{font-size:13px;}
+  /* Page header */
+  .page-title{font-size:20px;}
+  /* Botões de ação rápida */
+  .quick-chip{font-size:11px;padding:5px 10px;}
 }
 .topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
 .logo{display:flex;align-items:center;gap:10px;cursor:pointer;}
