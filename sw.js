@@ -4,7 +4,7 @@
 // Cache offline + atualização automática
 // ============================================================
 
-const CACHE_NAME = 'mordomo-v1';
+const CACHE_NAME = 'mordomo-v5';
 const OFFLINE_URL = '/offline.html';
 
 // Arquivos para cache imediato (app shell)

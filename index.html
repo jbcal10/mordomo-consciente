@@ -7,6 +7,9 @@
   <!-- PWA META TAGS -->
   <meta name="theme-color" content="#c9a84c">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Mordomo">
@@ -368,7 +371,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     </div>
     <div class="topbar-right">
       <div class="sync-indicator"><div class="sync-dot"></div><span id="syncStatus">Sincronizado</span></div>
-      <div class="month-badge" id="currentMonth">📅 Março 2026</div>
+      <div class="month-badge" style="display:flex;align-items:center;gap:6px;cursor:default;">
+        <button onclick="navegarMes(-1)" style="background:none;border:none;color:var(--gold-light);cursor:pointer;font-size:14px;padding:0 2px;">◀</button>
+        <span id="currentMonth">📅 Abril 2026</span>
+        <button onclick="navegarMes(1)" style="background:none;border:none;color:var(--gold-light);cursor:pointer;font-size:14px;padding:0 2px;">▶</button>
+      </div>
       <div class="user-menu" onclick="toggleDropdown()">
         <div class="avatar" id="userAvatar">?</div>
         <div class="user-name" id="userName">Usuário</div>
@@ -563,14 +570,17 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <button class="ia-btn" onclick="saveProfile()" style="margin-top:4px;width:auto;padding:10px 20px;">💾 Salvar Perfil</button>
       </div>
       <div class="card" style="margin-bottom:14px;">
-        <div class="config-title">✨ IA Mordomo — Claude API Key</div>
+        <div class="config-title">🔒 Segurança</div>
         <div class="form-group">
-          <label class="form-label">API Key (sk-ant-...)</label>
-          <input type="password" class="form-input" id="configClaudeKey" placeholder="sk-ant-api03-..." oninput="this.dataset.changed='1'">
-          <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Obtenha sua key gratuita em <strong style="color:var(--gold-light)">console.anthropic.com</strong> → API Keys</div>
+          <label class="form-label">Nova Senha</label>
+          <input type="password" class="form-input" id="configNovaSenha" placeholder="Nova senha (mín. 6 caracteres)">
         </div>
-        <button class="ia-btn" onclick="saveClaudeKey()" style="margin-top:4px;width:auto;padding:10px 20px;">💾 Salvar Key da IA</button>
-        <div id="claudeKeyStatus" style="font-size:12px;margin-top:8px;color:var(--green);display:none;">✅ Key salva com sucesso!</div>
+        <div class="form-group">
+          <label class="form-label">Confirmar Nova Senha</label>
+          <input type="password" class="form-input" id="configConfirmaSenha" placeholder="Repita a nova senha">
+        </div>
+        <button class="ia-btn" onclick="trocarSenha()" style="margin-top:4px;width:auto;padding:10px 20px;">🔒 Alterar Senha</button>
+        <div id="senhaStatus" style="font-size:12px;margin-top:8px;display:none;"></div>
       </div>
       <div class="card" style="margin-bottom:14px;">
         <div class="config-title">Plano Atual</div>
@@ -579,7 +589,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
             <div style="font-size:15px;font-weight:600;" id="configPlano">Gratuito</div>
             <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">30 lançamentos/mês</div>
           </div>
-          <button class="ia-btn" style="width:auto;padding:10px 20px;">⭐ Fazer Upgrade</button>
+          <a href="https://wa.me/5561SEUNUMERO?text=Olá!+Quero+fazer+upgrade+do+Mordomo+Consciente" target="_blank" class="ia-btn" style="width:auto;padding:10px 20px;text-decoration:none;">⭐ Fazer Upgrade</a>
         </div>
       </div>
       <div class="card">
@@ -671,10 +681,36 @@ const THERMO_DIMS = [
 
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
+// Mês navegável — state.mesAtual = {year, month} (0-indexed)
+let _mesAtual = { year: new Date().getFullYear(), month: new Date().getMonth() };
+
 const getMesRef = () => {
-  const n = new Date();
-  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  return `${_mesAtual.year}-${String(_mesAtual.month+1).padStart(2,'0')}`;
 };
+
+const getMesLabel = () => `${MONTHS[_mesAtual.month]} ${_mesAtual.year}`;
+
+function navegarMes(dir) {
+  _mesAtual.month += dir;
+  if (_mesAtual.month > 11) { _mesAtual.month = 0; _mesAtual.year++; }
+  if (_mesAtual.month < 0)  { _mesAtual.month = 11; _mesAtual.year--; }
+  updateMesBadge();
+  reloadAllData();
+}
+
+function updateMesBadge() {
+  document.getElementById('currentMonth').textContent = `📅 ${getMesLabel()}`;
+}
+
+async function reloadAllData() {
+  setSyncing();
+  await Promise.all([loadTransactions(), loadBudget(), loadDebts(), loadThermo(), loadReservaConfig()]);
+  renderDashboard();
+  renderTransactions();
+  renderDebts();
+  renderThermo();
+  setSynced();
+}
 
 // ============================================================
 // AUTH
@@ -830,7 +866,7 @@ async function bootApp(user) {
   document.getElementById('configPlano').textContent = (profile?.plano || 'gratuito').charAt(0).toUpperCase() + (profile?.plano || 'gratuito').slice(1);
 
   const now = new Date();
-  document.getElementById('currentMonth').textContent = `📅 ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+  updateMesBadge();
 
   // Load all data
   await Promise.all([
@@ -911,17 +947,35 @@ async function doLogout() {
   showAuth();
 }
 
-function saveClaudeKey() {
-  const key = document.getElementById('configClaudeKey').value.trim();
-  if (!key.startsWith('sk-ant-')) {
-    alert('Key inválida. Deve começar com sk-ant-');
+async function trocarSenha() {
+  const nova = document.getElementById('configNovaSenha').value;
+  const confirma = document.getElementById('configConfirmaSenha').value;
+  const status = document.getElementById('senhaStatus');
+  if (nova.length < 6) {
+    status.style.display = 'block';
+    status.style.color = 'var(--red)';
+    status.textContent = '❌ A senha deve ter pelo menos 6 caracteres.';
     return;
   }
-  localStorage.setItem('mc_claude_key', key);
-  window.__CLAUDE_KEY = key;
-  const status = document.getElementById('claudeKeyStatus');
-  status.style.display = 'block';
-  setTimeout(() => status.style.display = 'none', 3000);
+  if (nova !== confirma) {
+    status.style.display = 'block';
+    status.style.color = 'var(--red)';
+    status.textContent = '❌ As senhas não coincidem.';
+    return;
+  }
+  const { error } = await sb.auth.updateUser({ password: nova });
+  if (error) {
+    status.style.display = 'block';
+    status.style.color = 'var(--red)';
+    status.textContent = '❌ Erro: ' + error.message;
+  } else {
+    status.style.display = 'block';
+    status.style.color = 'var(--green)';
+    status.textContent = '✅ Senha alterada com sucesso!';
+    document.getElementById('configNovaSenha').value = '';
+    document.getElementById('configConfirmaSenha').value = '';
+    setTimeout(() => status.style.display = 'none', 3000);
+  }
 }
 
 async function saveProfile() {
@@ -1380,7 +1434,7 @@ function renderThermo() {
     return `<div class="thermo-item">
       <div class="thermo-top">
         <div><div class="thermo-name">${d.name}</div><div class="thermo-desc">${d.desc}</div></div>
-        <div class="thermo-stars">${[1,2,3,4,5].map(n=>`<div class="star ${val>=n?'filled':''}" onclick="setThermo(${i},${n})">${n}</div>`).join('')}</div>
+        <div class="thermo-stars">${[0,1,2,3,4,5].map(n=>`<div class="star ${val>=n&&n>0?'filled':''} ${val===0&&n===0?'filled':''}" onclick="setThermo(${i},${n})">${n}</div>`).join('')}</div>
       </div>
       <div class="thermo-bar-wrap"><div class="thermo-bar" style="width:${(val/5)*100}%"></div></div>
       <div style="font-size:11px;color:var(--text-muted);margin-top:5px;">💡 ${d.tip}</div>
