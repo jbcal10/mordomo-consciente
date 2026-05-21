@@ -668,6 +668,16 @@ const CATEGORIES = [
   { name:'Vestuário', icon:'👕', pct:'3–5%' },
   { name:'Dízimo/Oferta', icon:'⛪', pct:'10%' },
   { name:'Reserva', icon:'🏦', pct:'10%' },
+  { name:'Investimentos', icon:'📈', pct:'5–10%' },
+  { name:'Assinaturas', icon:'📱', pct:'2–3%' },
+  { name:'Beleza/Higiene', icon:'✂️', pct:'2–3%' },
+  { name:'Pet', icon:'🐾', pct:'1–2%' },
+  { name:'Presentes/Social', icon:'🎁', pct:'2–3%' },
+  { name:'Manutenção Casa', icon:'🔧', pct:'2–5%' },
+  { name:'Impostos/Taxas', icon:'🏛️', pct:'—' },
+  { name:'Viagem', icon:'✈️', pct:'—' },
+  { name:'Igreja/Missões', icon:'🙏', pct:'—' },
+  { name:'Freelance/Extra', icon:'💼', pct:'—' },
   { name:'Outros', icon:'📦', pct:'—' },
 ];
 
@@ -861,7 +871,7 @@ async function bootApp(user) {
   document.getElementById('userAvatar').textContent = nome.charAt(0).toUpperCase();
   document.getElementById('configNome').value = nome;
   const _ck = localStorage.getItem('mc_claude_key') || '';
-  if (_ck) document.getElementById('configClaudeKey').value = _ck;
+  // configClaudeKey removido das configurações
   document.getElementById('configEmail').value = user.email;
   document.getElementById('configPlano').textContent = (profile?.plano || 'gratuito').charAt(0).toUpperCase() + (profile?.plano || 'gratuito').slice(1);
 
@@ -1078,7 +1088,7 @@ async function callIA(prompt) {
   return callClaude(
     `Você é o Mordomo Consciente, assistente de finanças pessoais com valores cristãos.
 Ao receber uma descrição de transação financeira em linguagem natural, extraia e retorne APENAS um JSON válido:
-{"tipo":"receita" ou "despesa","valor":número,"categoria":"Moradia|Alimentação|Transporte|Saúde|Educação|Lazer|Vestuário|Dízimo/Oferta|Reserva|Outros","descricao":"descrição curta max 40 chars","forma_pagto":"Dinheiro|Cartão Crédito|Cartão Débito|Pix|Transferência|Outro","data":"DD/MM/YYYY use data de hoje se não informado","mensagem":"frase encorajadora cristã max 80 chars"}
+{"tipo":"receita" ou "despesa","valor":número,"categoria":"Moradia|Alimentação|Transporte|Saúde|Educação|Lazer|Vestuário|Dízimo/Oferta|Reserva|Investimentos|Assinaturas|Beleza/Higiene|Pet|Presentes/Social|Manutenção Casa|Impostos/Taxas|Viagem|Igreja/Missões|Freelance/Extra|Outros","descricao":"descrição curta max 40 chars","forma_pagto":"Dinheiro|Cartão Crédito|Cartão Débito|Pix|Transferência|Outro","data":"DD/MM/YYYY use data de hoje se não informado","mensagem":"frase encorajadora cristã max 80 chars"}
 Responda APENAS com JSON puro, sem markdown, sem texto adicional.`,
     prompt
   );
@@ -1190,10 +1200,11 @@ async function processIA(source) {
     respEl.innerHTML = '⚠️ Erro: ' + msg;
     respEl.classList.add('show');
     setSynced();
+  } finally {
+    // Sempre reabilita o botão, mesmo em caso de erro
+    btnEl.disabled = false;
+    txtEl.innerHTML = source === 'tx' ? '⚡' : '⚡ Registrar';
   }
-
-  btnEl.disabled = false;
-  txtEl.textContent = '⚡ Registrar';
 }
 
 // ============================================================
@@ -1300,7 +1311,7 @@ function renderDashboard() {
   document.getElementById('dashCatTable').innerHTML = rows || `<tr><td colspan="6"><div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Lance transações para ver o resumo</div></div></td></tr>`;
 }
 
-const getCatIcon = cat => ({Moradia:'🏠',Alimentação:'🛒',Transporte:'🚗',Saúde:'💊',Educação:'📚',Lazer:'🎉',Vestuário:'👕','Dízimo/Oferta':'⛪',Reserva:'🏦',Outros:'📦'})[cat]||'💸';
+const getCatIcon = cat => ({Moradia:'🏠',Alimentação:'🛒',Transporte:'🚗',Saúde:'💊',Educação:'📚',Lazer:'🎉',Vestuário:'👕','Dízimo/Oferta':'⛪',Reserva:'🏦',Investimentos:'📈',Assinaturas:'📱','Beleza/Higiene':'✂️',Pet:'🐾','Presentes/Social':'🎁','Manutenção Casa':'🔧','Impostos/Taxas':'🏛️',Viagem:'✈️','Igreja/Missões':'🙏','Freelance/Extra':'💼',Outros:'📦'})[cat]||'💸';
 
 function renderTransactions() {
   const list = document.getElementById('txList');
@@ -1503,8 +1514,23 @@ function toast(msg, type='success') {
 }
 
 // ============================================================
-// INIT
+// INIT — Limpa SW/cache antigo se houver versão nova
 // ============================================================
+(async () => {
+  try {
+    const APP_VERSION = 'v6';
+    const storedVersion = localStorage.getItem('app_version');
+    if (storedVersion !== APP_VERSION) {
+      // Nova versão detectada — limpa caches antigos
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      localStorage.setItem('app_version', APP_VERSION);
+    }
+  } catch(e) { /* silencioso */ }
+})();
+
 initAuth();
 </script>
 
