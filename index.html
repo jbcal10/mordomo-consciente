@@ -295,6 +295,38 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* CONFIG SCREEN */
 .config-section{margin-bottom:28px;}
 .config-title{font-size:13px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;}
+
+/* METAS */
+.meta-item{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;}
+.meta-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.meta-name{font-size:14px;font-weight:600;}
+.meta-values{text-align:right;}
+.meta-atual{font-family:'Playfair Display',serif;font-size:16px;color:var(--gold-light);}
+.meta-total{font-size:11px;color:var(--text-muted);}
+.meta-prazo{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.meta-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+@media(max-width:768px){.meta-form{grid-template-columns:1fr;}}
+
+/* PATRIMÔNIO */
+.pat-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border-radius:9px;border:1px solid transparent;margin-bottom:6px;}
+.pat-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.pat-icon.ativo{background:rgba(76,175,130,0.12);}
+.pat-icon.passivo{background:rgba(224,92,92,0.1);}
+.pat-info{flex:1;}
+.pat-name{font-size:13px;font-weight:500;}
+.pat-cat{font-size:11px;color:var(--text-muted);}
+.pat-valor{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;}
+.pat-valor.ativo{color:var(--green);}
+.pat-valor.passivo{color:var(--red);}
+
+/* RELATÓRIOS */
+.relatorio-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;}
+.relatorio-titulo{font-size:14px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.insight-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(42,48,68,0.4);}
+.insight-item:last-child{border-bottom:none;}
+.insight-icon{font-size:18px;flex-shrink:0;}
+.insight-text{font-size:13px;color:var(--text);line-height:1.5;}
+.insight-text strong{color:var(--gold-light);}
 </style>
 </head>
 <body>
@@ -401,6 +433,13 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <div class="nav-item" onclick="goTo('dividas')" data-page="dividas"><span class="nav-icon">💳</span>Dívidas</div>
       <div class="nav-item" onclick="goTo('reserva')" data-page="reserva"><span class="nav-icon">🏦</span>Reserva</div>
       <div class="nav-item" onclick="goTo('termometro')" data-page="termometro"><span class="nav-icon">🌡️</span>Termômetro</div>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-section">
+      <div class="nav-label">Análise</div>
+      <div class="nav-item" onclick="goTo('metas')" data-page="metas"><span class="nav-icon">🎯</span>Metas</div>
+      <div class="nav-item" onclick="goTo('patrimonio')" data-page="patrimonio"><span class="nav-icon">📈</span>Patrimônio</div>
+      <div class="nav-item" onclick="goTo('relatorios')" data-page="relatorios"><span class="nav-icon">📋</span>Relatórios</div>
     </div>
     <div class="nav-divider"></div>
     <div class="nav-section">
@@ -560,6 +599,98 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       </div>
     </div>
 
+    <!-- METAS -->
+    <div class="page" id="page-metas">
+      <div class="page-header"><div class="page-title">🎯 Metas Financeiras</div><div class="page-subtitle">Defina aonde quer chegar. O caminho se revela no planejamento.</div></div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="section-title">Nova Meta</div>
+        <div class="meta-form">
+          <div><label class="form-label">Nome da meta</label><input type="text" class="form-input" id="metaNome" placeholder="Ex: Quitar cartão, Viagem..."></div>
+          <div><label class="form-label">Valor total (R$)</label><input type="number" class="form-input" id="metaValor" placeholder="0,00"></div>
+          <div><label class="form-label">Valor já guardado (R$)</label><input type="number" class="form-input" id="metaAtual" placeholder="0,00"></div>
+          <div><label class="form-label">Prazo (mês/ano)</label><input type="month" class="form-input" id="metaPrazo"></div>
+        </div>
+        <div><label class="form-label">Ícone</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;" id="metaIconSelector">
+            <span class="tag" onclick="selectMetaIcon(this,'🎯')" data-icon="🎯">🎯 Meta</span>
+            <span class="tag" onclick="selectMetaIcon(this,'✈️')" data-icon="✈️">✈️ Viagem</span>
+            <span class="tag" onclick="selectMetaIcon(this,'🏠')" data-icon="🏠">🏠 Imóvel</span>
+            <span class="tag" onclick="selectMetaIcon(this,'🚗')" data-icon="🚗">🚗 Veículo</span>
+            <span class="tag" onclick="selectMetaIcon(this,'📚')" data-icon="📚">📚 Educação</span>
+            <span class="tag" onclick="selectMetaIcon(this,'💒')" data-icon="💒">💒 Casamento</span>
+            <span class="tag" onclick="selectMetaIcon(this,'💳')" data-icon="💳">💳 Quitar dívida</span>
+            <span class="tag" onclick="selectMetaIcon(this,'🏦')" data-icon="🏦">🏦 Reserva</span>
+          </div>
+        </div>
+        <button class="ia-btn" onclick="addMeta()" style="margin-top:14px;width:100%;">+ Adicionar Meta</button>
+      </div>
+      <div class="card"><div class="section-title">Minhas Metas <span id="metasCount"></span></div><div id="metasList"><div class="empty"><div class="empty-icon">🎯</div><div class="empty-text">Nenhuma meta ainda. Defina seu próximo objetivo!</div></div></div></div>
+      <div class="quote-bar">"Onde não há visão, o povo perece." — Provérbios 29:18</div>
+    </div>
+
+    <!-- PATRIMÔNIO -->
+    <div class="page" id="page-patrimonio">
+      <div class="page-header"><div class="page-title">📈 Patrimônio Líquido</div><div class="page-subtitle">Você não é dono. É mordomo. Mas precisa saber o que administra.</div></div>
+      <div class="grid-3" style="margin-bottom:18px;">
+        <div class="card"><div class="card-title">💚 Total de Ativos</div><div class="card-value green" id="totalAtivos">R$ 0,00</div></div>
+        <div class="card"><div class="card-title">🔴 Total de Passivos</div><div class="card-value red" id="totalPassivos">R$ 0,00</div></div>
+        <div class="card"><div class="card-title">⚖️ Patrimônio Líquido</div><div class="card-value gold" id="patrimonioLiquido">R$ 0,00</div></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:14px;">
+        <div class="card">
+          <div class="section-title">➕ Adicionar Ativo</div>
+          <div class="form-group"><label class="form-label">Descrição</label><input type="text" class="form-input" id="ativoNome" placeholder="Ex: Imóvel, Carro, Investimento..."></div>
+          <div class="form-group"><label class="form-label">Categoria</label>
+            <select class="form-input" id="ativoCategoria">
+              <option>Imóvel</option><option>Veículo</option><option>Investimentos</option>
+              <option>Poupança</option><option>Negócio</option><option>Outros</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Valor (R$)</label><input type="number" class="form-input" id="ativoValor" placeholder="0,00"></div>
+          <button class="ia-btn" onclick="addPatrimonio('ativo')" style="width:100%;">+ Adicionar Ativo</button>
+        </div>
+        <div class="card">
+          <div class="section-title">➖ Adicionar Passivo</div>
+          <div class="form-group"><label class="form-label">Descrição</label><input type="text" class="form-input" id="passivoNome" placeholder="Ex: Financiamento, Dívida..."></div>
+          <div class="form-group"><label class="form-label">Categoria</label>
+            <select class="form-input" id="passivoCategoria">
+              <option>Financiamento</option><option>Cartão de Crédito</option><option>Empréstimo</option>
+              <option>Cheque Especial</option><option>Outros</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Valor (R$)</label><input type="number" class="form-input" id="passivoValor" placeholder="0,00"></div>
+          <button class="ia-btn" onclick="addPatrimonio('passivo')" style="width:100%;background:linear-gradient(135deg,#e05c5c,#b03030);">+ Adicionar Passivo</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Balanço Patrimonial</div>
+        <div id="patrimonioList"><div class="empty"><div class="empty-icon">📈</div><div class="empty-text">Adicione seus ativos e passivos para ver o balanço.</div></div></div>
+      </div>
+      <div class="quote-bar">"Com sabedoria se edifica a casa, e com entendimento ela se consolida." — Provérbios 24:3</div>
+    </div>
+
+    <!-- RELATÓRIOS -->
+    <div class="page" id="page-relatorios">
+      <div class="page-header"><div class="page-title">📋 Relatórios & Insights</div><div class="page-subtitle">A IA analisa seus dados e revela padrões que você talvez não veja.</div></div>
+      <div style="text-align:center;margin-bottom:18px;">
+        <button class="ia-btn" onclick="gerarRelatorio()" id="relatorioBtn" style="padding:14px 32px;font-size:14px;">
+          <span id="relatorioBtnText">✨ Gerar Análise com IA</span>
+        </button>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">Analisa lançamentos, orçamento e dívidas do mês atual</div>
+      </div>
+      <div id="relatorioContent">
+        <div class="relatorio-card">
+          <div class="relatorio-titulo">📊 Resumo do Mês</div>
+          <div id="relatorioResumo"><div class="empty"><div class="empty-text" style="font-size:12px;">Clique em "Gerar Análise" para ver os insights do mês.</div></div></div>
+        </div>
+        <div class="relatorio-card">
+          <div class="relatorio-titulo">💡 Insights da IA</div>
+          <div id="relatorioInsights"><div class="empty"><div class="empty-text" style="font-size:12px;">A IA analisará seus padrões de gasto e dará recomendações.</div></div></div>
+        </div>
+      </div>
+      <div class="quote-bar">"O prudente vê o perigo e se esconde; os inexperientes seguem em frente e sofrem as consequências." — Provérbios 22:3</div>
+    </div>
+
     <!-- CONFIG -->
     <div class="page" id="page-config">
       <div class="page-header"><div class="page-title">⚙️ Configurações</div><div class="page-subtitle">Gerencie sua conta e preferências.</div></div>
@@ -655,7 +786,9 @@ let state = {
   despesasEssenciais: 0,
   reservaAtual: 0,
   renda: 0,
-  reserva: []
+  reserva: [],
+  metas: [],
+  patrimonio: [],
 };
 
 const CATEGORIES = [
@@ -714,11 +847,13 @@ function updateMesBadge() {
 
 async function reloadAllData() {
   setSyncing();
-  await Promise.all([loadTransactions(), loadBudget(), loadDebts(), loadThermo(), loadReservaConfig()]);
+  await Promise.all([loadTransactions(), loadBudget(), loadDebts(), loadThermo(), loadReservaConfig(), loadMetas(), loadPatrimonio()]);
   renderDashboard();
   renderTransactions();
   renderDebts();
   renderThermo();
+  renderMetas();
+  renderPatrimonio();
   setSynced();
 }
 
@@ -886,6 +1021,8 @@ async function bootApp(user) {
     loadThermo(),
     loadReservaConfig(),
     loadReserva(),
+    loadMetas(),
+    loadPatrimonio(),
   ]);
 
   renderAll();
@@ -1147,7 +1284,8 @@ async function processIA(source) {
 
   btnEl.disabled = true;
   txtEl.innerHTML = '<span class="spinner"></span>';
-  respEl.classList.remove('show');
+  respEl.innerHTML = '⏳ Interpretando com IA...';
+  respEl.classList.add('show');
   setSyncing();
 
   try {
@@ -1274,7 +1412,7 @@ async function deleteDebt(id) {
 // ============================================================
 const fmt = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
-function renderAll() { renderDashboard(); renderTransactions(); renderDebts(); }
+function renderAll() { renderDashboard(); renderTransactions(); renderDebts(); renderMetas(); renderPatrimonio(); }
 
 function renderDashboard() {
   const income = state.transactions.filter(t=>t.tipo==='receita').reduce((s,t)=>s+t.valor,0);
@@ -1514,11 +1652,235 @@ function toast(msg, type='success') {
 }
 
 // ============================================================
+// METAS
+// ============================================================
+let _metaIconSelecionado = '🎯';
+function selectMetaIcon(el, icon) {
+  _metaIconSelecionado = icon;
+  document.querySelectorAll('#metaIconSelector .tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+async function addMeta() {
+  const nome = document.getElementById('metaNome').value.trim();
+  const valor = parseFloat(document.getElementById('metaValor').value) || 0;
+  const atual = parseFloat(document.getElementById('metaAtual').value) || 0;
+  const prazo = document.getElementById('metaPrazo').value;
+  if (!nome || !valor) { toast('Preencha nome e valor total.', 'error'); return; }
+  setSyncing();
+  const { data, error } = await sb.from('metas').insert({
+    user_id: currentUser.id, nome, valor_total: valor,
+    valor_atual: atual, prazo, icone: _metaIconSelecionado
+  }).select().single();
+  if (error) { toast('Erro: ' + error.message, 'error'); setSynced(); return; }
+  state.metas.push(data);
+  renderMetas();
+  document.getElementById('metaNome').value = '';
+  document.getElementById('metaValor').value = '';
+  document.getElementById('metaAtual').value = '';
+  document.getElementById('metaPrazo').value = '';
+  setSynced();
+  toast('Meta adicionada!', 'success');
+}
+
+async function updateMetaAtual(id, valor) {
+  const v = parseFloat(valor) || 0;
+  await sb.from('metas').update({ valor_atual: v }).eq('id', id);
+  const m = state.metas.find(m => m.id === id);
+  if (m) m.valor_atual = v;
+  renderMetas();
+}
+
+async function deleteMeta(id) {
+  await sb.from('metas').delete().eq('id', id);
+  state.metas = state.metas.filter(m => m.id !== id);
+  renderMetas();
+  toast('Meta removida.', 'success');
+}
+
+function renderMetas() {
+  const list = document.getElementById('metasList');
+  document.getElementById('metasCount').textContent = state.metas.length + ' metas';
+  if (!state.metas.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">🎯</div><div class="empty-text">Nenhuma meta ainda.</div></div>';
+    return;
+  }
+  list.innerHTML = state.metas.map(m => {
+    const pct = m.valor_total > 0 ? Math.min((m.valor_atual / m.valor_total) * 100, 100) : 0;
+    const falta = Math.max(0, m.valor_total - m.valor_atual);
+    const reached = m.valor_atual >= m.valor_total && m.valor_total > 0;
+    const prazoLabel = m.prazo ? new Date(m.prazo + '-01').toLocaleDateString('pt-BR', {month:'long', year:'numeric'}) : '—';
+    return `<div class="meta-item">
+      <div class="meta-header">
+        <div><div class="meta-name">${m.icone || '🎯'} ${m.nome}</div><div class="meta-prazo">Prazo: ${prazoLabel}</div></div>
+        <div class="meta-values">
+          <div class="meta-atual">${fmt(m.valor_atual)}</div>
+          <div class="meta-total">de ${fmt(m.valor_total)}</div>
+        </div>
+      </div>
+      <div class="progress-wrap" style="width:100%;height:8px;margin-bottom:8px;">
+        <div class="progress-bar" style="width:${pct}%;background:${reached?'var(--green)':'var(--gold)'}"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:${reached?'var(--green)':'var(--text-muted)'};">${reached ? '✅ Meta atingida!' : 'Falta: ' + fmt(falta) + ' ('+pct.toFixed(0)+'%)'}</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="number" placeholder="Atualizar valor" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:11px;width:120px;outline:none;" onchange="updateMetaAtual('${m.id}',this.value)">
+          <button class="tx-delete" onclick="deleteMeta('${m.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadMetas() {
+  const { data } = await sb.from('metas').select('*').eq('user_id', currentUser.id).order('created_at');
+  state.metas = data || [];
+}
+
+// ============================================================
+// PATRIMÔNIO
+// ============================================================
+async function addPatrimonio(tipo) {
+  const nomeId = tipo === 'ativo' ? 'ativoNome' : 'passivoNome';
+  const catId = tipo === 'ativo' ? 'ativoCategoria' : 'passivoCategoria';
+  const valId = tipo === 'ativo' ? 'ativoValor' : 'passivoValor';
+  const nome = document.getElementById(nomeId).value.trim();
+  const categoria = document.getElementById(catId).value;
+  const valor = parseFloat(document.getElementById(valId).value) || 0;
+  if (!nome || !valor) { toast('Preencha nome e valor.', 'error'); return; }
+  setSyncing();
+  const { data, error } = await sb.from('patrimonio').insert({
+    user_id: currentUser.id, nome, categoria, valor, tipo
+  }).select().single();
+  if (error) { toast('Erro: ' + error.message, 'error'); setSynced(); return; }
+  state.patrimonio.push(data);
+  renderPatrimonio();
+  document.getElementById(nomeId).value = '';
+  document.getElementById(valId).value = '';
+  setSynced();
+  toast(tipo === 'ativo' ? 'Ativo adicionado!' : 'Passivo adicionado!', 'success');
+}
+
+async function deletePatrimonio(id) {
+  await sb.from('patrimonio').delete().eq('id', id);
+  state.patrimonio = state.patrimonio.filter(p => p.id !== id);
+  renderPatrimonio();
+  toast('Removido.', 'success');
+}
+
+function renderPatrimonio() {
+  const ativos = state.patrimonio.filter(p => p.tipo === 'ativo');
+  const passivos = state.patrimonio.filter(p => p.tipo === 'passivo');
+  const totalAtivos = ativos.reduce((s, p) => s + p.valor, 0);
+  const totalPassivos = passivos.reduce((s, p) => s + p.valor, 0);
+  const liquido = totalAtivos - totalPassivos;
+  document.getElementById('totalAtivos').textContent = fmt(totalAtivos);
+  document.getElementById('totalPassivos').textContent = fmt(totalPassivos);
+  const el = document.getElementById('patrimonioLiquido');
+  el.textContent = fmt(liquido);
+  el.className = 'card-value ' + (liquido >= 0 ? 'green' : 'red');
+
+  const catIcons = {Imóvel:'🏠',Veículo:'🚗',Investimentos:'📈',Poupança:'🏦',Negócio:'💼',Outros:'📦',Financiamento:'🏗️','Cartão de Crédito':'💳',Empréstimo:'💰','Cheque Especial':'⚠️'};
+  const list = document.getElementById('patrimonioList');
+  if (!state.patrimonio.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">📈</div><div class="empty-text">Adicione seus ativos e passivos.</div></div>';
+    return;
+  }
+  const renderGroup = (items, tipo) => items.map(p => `
+    <div class="pat-item">
+      <div class="pat-icon ${tipo}">${catIcons[p.categoria] || (tipo==='ativo'?'💚':'🔴')}</div>
+      <div class="pat-info"><div class="pat-name">${p.nome}</div><div class="pat-cat">${p.categoria}</div></div>
+      <div class="pat-valor ${tipo}">${tipo==='passivo'?'−':''}${fmt(p.valor)}</div>
+      <button class="tx-delete" onclick="deletePatrimonio('${p.id}')">🗑</button>
+    </div>`).join('');
+
+  list.innerHTML = (ativos.length ? `<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--green);margin-bottom:6px;">ATIVOS</div>${renderGroup(ativos,'ativo')}` : '') +
+    (passivos.length ? `<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--red);margin:12px 0 6px;">PASSIVOS</div>${renderGroup(passivos,'passivo')}` : '');
+}
+
+async function loadPatrimonio() {
+  const { data } = await sb.from('patrimonio').select('*').eq('user_id', currentUser.id).order('tipo,created_at');
+  state.patrimonio = data || [];
+}
+
+// ============================================================
+// RELATÓRIOS
+// ============================================================
+async function gerarRelatorio() {
+  const btn = document.getElementById('relatorioBtn');
+  const txt = document.getElementById('relatorioBtnText');
+  btn.disabled = true;
+  txt.innerHTML = '<span class="spinner"></span> Analisando...';
+
+  const income = state.transactions.filter(t=>t.tipo==='receita').reduce((s,t)=>s+t.valor,0);
+  const expense = state.transactions.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+t.valor,0);
+  const saldo = income - expense;
+  const spentByCat = {};
+  state.transactions.filter(t=>t.tipo==='despesa').forEach(t=>{ spentByCat[t.categoria]=(spentByCat[t.categoria]||0)+t.valor; });
+  const topCats = Object.entries(spentByCat).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  // Resumo sem IA
+  document.getElementById('relatorioResumo').innerHTML = `
+    <div class="insight-item"><span class="insight-icon">💰</span><div class="insight-text">Receitas: <strong>${fmt(income)}</strong> · Gastos: <strong>${fmt(expense)}</strong> · Saldo: <strong style="color:${saldo>=0?'var(--green)':'var(--red)'}">${fmt(saldo)}</strong></div></div>
+    <div class="insight-item"><span class="insight-icon">📊</span><div class="insight-text">Lançamentos: <strong>${state.transactions.length}</strong> no mês · <strong>${state.transactions.filter(t=>t.tipo==='receita').length}</strong> receitas e <strong>${state.transactions.filter(t=>t.tipo==='despesa').length}</strong> despesas</div></div>
+    ${topCats.map(([cat,val]) => `<div class="insight-item"><span class="insight-icon">${{Moradia:'🏠',Alimentação:'🛒',Transporte:'🚗',Saúde:'💊',Educação:'📚',Lazer:'🎉','Dízimo/Oferta':'⛪'}[cat]||'💸'}</span><div class="insight-text"><strong>${cat}:</strong> ${fmt(val)} (${expense>0?((val/expense)*100).toFixed(0):0}% dos gastos)</div></div>`).join('')}
+    ${state.debts.length ? `<div class="insight-item"><span class="insight-icon">💳</span><div class="insight-text">Dívidas ativas: <strong>${state.debts.length}</strong> · Total: <strong style="color:var(--red)">${fmt(state.debts.reduce((s,d)=>s+d.saldo,0))}</strong></div></div>` : ''}
+  `;
+
+  // Insights com IA
+  try {
+    const dadosContexto = JSON.stringify({
+      mes: getMesLabel(),
+      receitas: income,
+      gastos: expense,
+      saldo,
+      top_categorias: topCats,
+      total_lancamentos: state.transactions.length,
+      dividas: state.debts.length,
+      total_dividas: state.debts.reduce((s,d)=>s+d.saldo,0),
+      orcamento_definido: Object.keys(state.budget).length > 0,
+      reserva_atual: state.reservaAtual,
+      meta_reserva: state.despesasEssenciais * 3,
+    });
+
+    const result = await callClaudeRelatorio(dadosContexto);
+    document.getElementById('relatorioInsights').innerHTML = result.insights.map(i =>
+      `<div class="insight-item"><span class="insight-icon">${i.icone}</span><div class="insight-text">${i.texto}</div></div>`
+    ).join('');
+  } catch(e) {
+    document.getElementById('relatorioInsights').innerHTML = `<div class="empty"><div class="empty-text" style="font-size:12px;">⚠️ Erro ao gerar insights: ${e.message}</div></div>`;
+  }
+
+  btn.disabled = false;
+  txt.textContent = '✨ Atualizar Análise';
+}
+
+async function callClaudeRelatorio(dadosContexto) {
+  const res = await fetch('/.netlify/functions/ia', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      system: `Você é o Mordomo Consciente, conselheiro financeiro cristão. Analise os dados financeiros e retorne APENAS JSON:
+{"insights":[{"icone":"emoji","texto":"insight em português com <strong>destaque</strong> onde relevante"}]}
+Gere 4-6 insights práticos, pastorais e motivadores. Aponte padrões, alertas e elogios específicos baseados nos números. Use perspectiva bíblica sem ser piegas. Responda APENAS com JSON puro.`,
+      prompt: `Dados financeiros de ${getMesLabel()}:
+${dadosContexto}`
+    })
+  });
+  const d = await res.json();
+  if (!res.ok) throw new Error(d?.error || 'Erro ' + res.status);
+  const text = d.text || '';
+  const match = text.replace(/\`\`\`json\s*/gi,'').replace(/\`\`\`/g,'').trim().match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('Formato inválido');
+  return JSON.parse(match[0]);
+}
+
+// ============================================================
 // INIT — Limpa SW/cache antigo se houver versão nova
 // ============================================================
 (async () => {
   try {
-    const APP_VERSION = 'v6';
+    const APP_VERSION = 'v7';
     const storedVersion = localStorage.getItem('app_version');
     if (storedVersion !== APP_VERSION) {
       // Nova versão detectada — limpa caches antigos
