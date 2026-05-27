@@ -456,29 +456,23 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <div class="page-title">Dashboard</div>
         <div class="page-subtitle">"Quem é fiel no mínimo também é fiel no muito." — Lucas 16:10</div>
       </div>
-      <div class="ia-container">
-        <div class="ia-header"><div class="ia-badge">✨ IA MORDOMO</div><div class="ia-hint">Diga um gasto ou receita em linguagem natural</div></div>
-        <div class="ia-input-row">
-          <textarea class="ia-input" id="dashInput" placeholder='"Gastei 85 reais no mercado hoje" ou "Recebi 3500 de salário"' rows="2"></textarea>
-          <button class="ia-btn" onclick="processIA('dash')" id="dashBtn"><span id="dashBtnText">⚡ Registrar</span></button>
-        </div>
-        <div class="example-tags">
-          <div class="tag" onclick="setInput('dashInput','Gastei 85 reais no supermercado hoje')">🛒 Mercado</div>
-          <div class="tag" onclick="setInput('dashInput','Recebi 3500 reais de salário')">💰 Salário</div>
-          <div class="tag" onclick="setInput('dashInput','Paguei 1200 de aluguel')">🏠 Aluguel</div>
-          <div class="tag" onclick="setInput('dashInput','Dízimo de 350 reais na igreja')">⛪ Dízimo</div>
-        </div>
-        <div class="ia-response" id="dashResponse"></div>
+      <!-- Cards principais -->
+      <div class="grid-3" style="margin-bottom:14px;">
+        <div class="card"><div class="card-title">💰 Receitas do Mês</div><div class="card-value green" id="totalIncome">R$ 0,00</div><div class="card-sub" id="incomeCount">0 lançamentos</div></div>
+        <div class="card"><div class="card-title">💳 Fatura Cartão</div><div class="card-value red" id="totalCartao">R$ 0,00</div><div class="card-sub" id="cartaoCount">0 lançamentos</div></div>
+        <div class="card"><div class="card-title">💸 Outros Gastos</div><div class="card-value red" id="totalOutros">R$ 0,00</div><div class="card-sub">Pix · Dinheiro · Débito</div></div>
       </div>
       <div class="grid-3" style="margin-bottom:18px;">
-        <div class="card"><div class="card-title">💰 Receitas do Mês</div><div class="card-value green" id="totalIncome">R$ 0,00</div><div class="card-sub" id="incomeCount">0 lançamentos</div></div>
-        <div class="card"><div class="card-title">💸 Gastos do Mês</div><div class="card-value red" id="totalExpense">R$ 0,00</div><div class="card-sub" id="expenseCount">0 lançamentos</div></div>
-        <div class="card"><div class="card-title">⚖️ Saldo</div><div class="card-value gold" id="totalBalance">R$ 0,00</div><div class="card-sub">Receitas − Gastos</div></div>
+        <div class="card"><div class="card-title">⚖️ Saldo em Conta</div><div class="card-value gold" id="totalBalance">R$ 0,00</div><div class="card-sub">Receitas − Gastos à vista</div></div>
+        <div class="card"><div class="card-title">🏦 Reserva Atual</div><div class="card-value green" id="dashReserva">R$ 0,00</div><div class="card-sub" id="dashReservaMeta"></div></div>
+        <div class="card"><div class="card-title">📈 Patrimônio Líquido</div><div class="card-value gold" id="dashPatrimonio">R$ 0,00</div><div class="card-sub" id="dashDividas"></div></div>
       </div>
+      <!-- Gastos por Categoria — só situação -->
       <div class="card">
         <div class="section-title">Gastos por Categoria</div>
-        <table class="cat-table"><thead><tr><th>Categoria</th><th>Orçado</th><th>Gasto</th><th>Saldo</th><th>%</th><th>Situação</th></tr></thead>
-        <tbody id="dashCatTable"><tr><td colspan="6"><div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Lance transações para ver o resumo</div></div></td></tr></tbody></table>
+        <div id="dashCatGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:8px;">
+          <div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Lance transações para ver o resumo</div></div>
+        </div>
       </div>
       <div class="quote-bar">"Os planos bem elaborados trazem lucro." — Provérbios 21:5</div>
     </div>
@@ -494,6 +488,16 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
             <button id="voiceTxBtn" onclick="startVoice('txInput')" title="Gravar por voz" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:44px;height:44px;cursor:pointer;font-size:20px;color:var(--gold-light);display:flex;align-items:center;justify-content:center;">🎙️</button>
             <button class="ia-btn" onclick="processIA('tx')" id="txBtn" style="flex:1;"><span id="txBtnText">⚡</span></button>
           </div>
+        </div>
+        <div class="example-tags" style="margin-top:10px;">
+          <div class="tag" onclick="setInput('txInput','Gastei 85 reais no supermercado hoje')">🛒 Mercado</div>
+          <div class="tag" onclick="setInput('txInput','Recebi 3500 reais de salário')">💰 Salário</div>
+          <div class="tag" onclick="setInput('txInput','Paguei 1200 de aluguel pelo Pix')">🏠 Aluguel</div>
+          <div class="tag" onclick="setInput('txInput','Dízimo de 350 reais na igreja')">⛪ Dízimo</div>
+          <div class="tag" onclick="setInput('txInput','Parcela do cartão 500 reais')">💳 Cartão</div>
+          <div class="tag" onclick="setInput('txInput','Uber 35 reais')">🚗 Transporte</div>
+          <div class="tag" onclick="setInput('txInput','Farmácia 80 reais')">💊 Saúde</div>
+          <div class="tag" onclick="setInput('txInput','Recebi aluguel de 1500 reais')">🏘️ Aluguel recebido</div>
         </div>
         <div class="ia-response" id="txResponse"></div>
       </div>
@@ -687,6 +691,24 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
           <div class="relatorio-titulo">💡 Insights da IA</div>
           <div id="relatorioInsights"><div class="empty"><div class="empty-text" style="font-size:12px;">A IA analisará seus padrões de gasto e dará recomendações.</div></div></div>
         </div>
+      </div>
+      <!-- Perguntas livres para a IA -->
+      <div class="relatorio-card">
+        <div class="relatorio-titulo">💬 Pergunte à IA sobre suas finanças</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Faça perguntas específicas sobre seus dados financeiros</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+          <span class="tag" onclick="setPergunta('Qual o valor total da minha fatura do cartão de crédito este mês?')">💳 Fatura cartão</span>
+          <span class="tag" onclick="setPergunta('Qual meu saldo atual considerando receitas e gastos?')">⚖️ Saldo atual</span>
+          <span class="tag" onclick="setPergunta('Qual categoria estou gastando mais e como posso economizar?')">📊 Maior gasto</span>
+          <span class="tag" onclick="setPergunta('Estou conseguindo seguir o orçamento planejado?')">🎯 Orçamento</span>
+          <span class="tag" onclick="setPergunta('Em quanto tempo consigo quitar minhas dívidas no ritmo atual?')">💸 Prazo dívidas</span>
+          <span class="tag" onclick="setPergunta('Minha reserva de emergência está adequada?')">🏦 Reserva</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <textarea id="perguntaInput" class="ia-input" rows="2" placeholder="Digite sua pergunta sobre suas finanças..." style="flex:1;"></textarea>
+          <button class="ia-btn" onclick="perguntarIA()" id="perguntaBtn" style="width:80px;"><span id="perguntaBtnText">⚡</span></button>
+        </div>
+        <div class="ia-response" id="perguntaResponse" style="margin-top:10px;"></div>
       </div>
       <div class="quote-bar">"O prudente vê o perigo e se esconde; os inexperientes seguem em frente e sofrem as consequências." — Provérbios 22:3</div>
     </div>
@@ -1224,7 +1246,17 @@ async function callClaude(systemPrompt, userPrompt) {
 async function callIA(prompt) {
   return callClaude(
     `Você é o Mordomo Consciente, assistente de finanças pessoais com valores cristãos.
-Ao receber uma descrição de transação financeira em linguagem natural, extraia e retorne APENAS um JSON válido:
+Ao receber uma descrição de transação financeira em linguagem natural, extraia e retorne APENAS um JSON válido.
+
+REGRAS CRÍTICAS PARA CATEGORIZAÇÃO:
+- Se for RECEITA (dinheiro ENTRANDO): salário, freela, aluguel recebido, venda, renda extra → tipo:"receita" e categoria deve ser "Salário", "Freelance/Extra", "Aluguel Recebido", "Investimentos" ou "Outros" conforme contexto. NUNCA use categorias de despesa para receitas.
+- Se for DESPESA (dinheiro SAINDO): supermercado, conta, parcela, pix pago, etc → tipo:"despesa" e use a categoria de gasto correta.
+- "Recebi aluguel" = receita, categoria "Outros" (não Moradia)
+- "Paguei aluguel" = despesa, categoria "Moradia"
+- "Salário" = sempre receita
+- "Freela" ou renda extra = receita, categoria "Freelance/Extra"
+
+JSON:
 {"tipo":"receita" ou "despesa","valor":número,"categoria":"Moradia|Alimentação|Transporte|Saúde|Educação|Lazer|Vestuário|Dízimo/Oferta|Reserva|Investimentos|Assinaturas|Beleza/Higiene|Pet|Presentes/Social|Manutenção Casa|Impostos/Taxas|Viagem|Igreja/Missões|Freelance/Extra|Outros","descricao":"descrição curta max 40 chars","forma_pagto":"Dinheiro|Cartão Crédito|Cartão Débito|Pix|Transferência|Outro","data":"DD/MM/YYYY use data de hoje se não informado","mensagem":"frase encorajadora cristã max 80 chars"}
 Responda APENAS com JSON puro, sem markdown, sem texto adicional.`,
     prompt
@@ -1269,7 +1301,7 @@ function startVoice(targetId) {
 
 async function processIA(source) {
   const map = {
-    dash:{inp:'dashInput',btn:'dashBtn',txt:'dashBtnText',resp:'dashResponse'},
+    dash:{inp:'txInput',btn:'txBtn',txt:'txBtnText',resp:'txResponse'},
     tx:  {inp:'txInput',  btn:'txBtn',  txt:'txBtnText',  resp:'txResponse'},
     ia:  {inp:'iaInput',  btn:'iaBtn',  txt:'iaBtnText',  resp:'iaResponse'},
     debt:{inp:'debtInput',btn:'debtBtn',txt:'debtBtnText',resp:'debtResponse'},
@@ -1400,6 +1432,31 @@ async function deleteTransaction(id) {
   toast('Lançamento removido.', 'success');
 }
 
+async function pagarParcela(id, parcela) {
+  const d = state.debts.find(d => d.id === id);
+  if (!d) return;
+  const novoSaldo = Math.max(0, d.saldo - parcela);
+  const { error } = await sb.from('debts').update({ saldo: novoSaldo }).eq('id', id);
+  if (error) { toast('Erro: ' + error.message, 'error'); return; }
+  d.saldo = novoSaldo;
+  if (novoSaldo === 0) toast('🎉 Dívida quitada! Que vitória!', 'success');
+  else toast(`Parcela paga! Saldo restante: ${fmt(novoSaldo)}`, 'success');
+  renderDebts();
+  renderDashboard();
+}
+
+async function atualizarSaldoDebt(id, valor) {
+  const novoSaldo = parseFloat(valor) || 0;
+  if (novoSaldo < 0) return;
+  const { error } = await sb.from('debts').update({ saldo: novoSaldo }).eq('id', id);
+  if (error) { toast('Erro: ' + error.message, 'error'); return; }
+  const d = state.debts.find(d => d.id === id);
+  if (d) d.saldo = novoSaldo;
+  toast('Saldo atualizado!', 'success');
+  renderDebts();
+  renderDashboard();
+}
+
 async function deleteDebt(id) {
   await sb.from('debts').delete().eq('id', id);
   state.debts = state.debts.filter(d => d.id !== id);
@@ -1416,37 +1473,54 @@ function renderAll() { renderDashboard(); renderTransactions(); renderDebts(); r
 
 function renderDashboard() {
   const income = state.transactions.filter(t=>t.tipo==='receita').reduce((s,t)=>s+t.valor,0);
-  const expense = state.transactions.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+t.valor,0);
-  const balance = income - expense;
+  const despesas = state.transactions.filter(t=>t.tipo==='despesa');
+  const cartao = despesas.filter(t=>t.forma_pagto==='Cartão Crédito').reduce((s,t)=>s+t.valor,0);
+  const outros = despesas.filter(t=>t.forma_pagto!=='Cartão Crédito').reduce((s,t)=>s+t.valor,0);
+  const totalExp = cartao + outros;
+  const balance = income - outros; // saldo em conta = receitas - gastos à vista
 
   document.getElementById('totalIncome').textContent = fmt(income);
-  document.getElementById('totalExpense').textContent = fmt(expense);
+  document.getElementById('incomeCount').textContent = state.transactions.filter(t=>t.tipo==='receita').length + ' lançamentos';
+  document.getElementById('totalCartao').textContent = fmt(cartao);
+  document.getElementById('cartaoCount').textContent = despesas.filter(t=>t.forma_pagto==='Cartão Crédito').length + ' lançamentos';
+  document.getElementById('totalOutros').textContent = fmt(outros);
   document.getElementById('totalBalance').textContent = fmt(balance);
   document.getElementById('totalBalance').className = 'card-value ' + (balance >= 0 ? 'green' : 'red');
-  document.getElementById('incomeCount').textContent = state.transactions.filter(t=>t.tipo==='receita').length + ' lançamentos';
-  document.getElementById('expenseCount').textContent = state.transactions.filter(t=>t.tipo==='despesa').length + ' lançamentos';
 
+  // Reserva e patrimônio
+  document.getElementById('dashReserva').textContent = fmt(state.reservaAtual||0);
+  const metaRes = (state.despesasEssenciais||0)*3;
+  document.getElementById('dashReservaMeta').textContent = metaRes>0 ? 'Meta: '+fmt(metaRes) : 'Configure na aba Reserva';
+  const ativos = state.patrimonio.filter(p=>p.tipo==='ativo').reduce((s,p)=>s+p.valor,0);
+  const passivos = state.patrimonio.filter(p=>p.tipo==='passivo').reduce((s,p)=>s+p.valor,0);
+  const liquido = ativos - passivos;
+  document.getElementById('dashPatrimonio').textContent = fmt(liquido);
+  document.getElementById('dashPatrimonio').className = 'card-value ' + (liquido>=0?'green':'red');
+  const totalDividas = state.debts.reduce((s,d)=>s+d.saldo,0);
+  document.getElementById('dashDividas').textContent = totalDividas>0 ? 'Dívidas: '+fmt(totalDividas) : 'Sem dívidas registradas';
+
+  // Grid de categorias — apenas situação
   const spentByCat = {};
-  state.transactions.filter(t=>t.tipo==='despesa').forEach(t=>{ spentByCat[t.categoria]=(spentByCat[t.categoria]||0)+t.valor; });
+  despesas.forEach(t=>{ spentByCat[t.categoria]=(spentByCat[t.categoria]||0)+t.valor; });
 
-  const rows = CATEGORIES.map(cat => {
+  const catCards = CATEGORIES.map(cat => {
     const spent = spentByCat[cat.name]||0;
     const budgeted = state.budget[cat.name]||0;
     if (spent===0 && budgeted===0) return '';
-    const saldo = budgeted - spent;
     const pct = budgeted>0 ? Math.min((spent/budgeted)*100,100) : 0;
     const cls = pct>100 ? 'danger' : pct>80 ? 'warn' : 'ok';
-    const lbl = pct>100 ? '🔴 Ultrapassado' : pct>80 ? '⚠️ Atenção' : '✅ OK';
-    return `<tr>
-      <td><strong>${cat.icon} ${cat.name}</strong></td>
-      <td>${fmt(budgeted)}</td><td>${fmt(spent)}</td>
-      <td style="color:${saldo<0?'var(--red)':'var(--green)'}">${fmt(saldo)}</td>
-      <td><div class="progress-wrap"><div class="progress-bar ${cls}" style="width:${pct}%"></div></div></td>
-      <td><span class="status ${cls}">${lbl}</span></td>
-    </tr>`;
+    const lbl = pct>100 ? '🔴 Estourado' : pct>80 ? '⚠️ Atenção' : '✅ OK';
+    const bg = pct>100 ? 'rgba(224,92,92,0.08)' : pct>80 ? 'rgba(224,156,92,0.08)' : 'rgba(76,175,130,0.06)';
+    return `<div style="background:${bg};border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
+      <div style="font-size:18px;margin-bottom:4px;">${cat.icon}</div>
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:4px;">${cat.name}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;margin-bottom:6px;">${fmt(spent)}</div>
+      <div class="progress-wrap" style="width:100%;height:5px;margin-bottom:6px;"><div class="progress-bar ${cls}" style="width:${pct}%"></div></div>
+      <span class="status ${cls}" style="font-size:10px;">${lbl}</span>
+    </div>`;
   }).filter(Boolean).join('');
 
-  document.getElementById('dashCatTable').innerHTML = rows || `<tr><td colspan="6"><div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Lance transações para ver o resumo</div></div></td></tr>`;
+  document.getElementById('dashCatGrid').innerHTML = catCards || '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Lance transações para ver o resumo</div></div>';
 }
 
 const getCatIcon = cat => ({Moradia:'🏠',Alimentação:'🛒',Transporte:'🚗',Saúde:'💊',Educação:'📚',Lazer:'🎉',Vestuário:'👕','Dízimo/Oferta':'⛪',Reserva:'🏦',Investimentos:'📈',Assinaturas:'📱','Beleza/Higiene':'✂️',Pet:'🐾','Presentes/Social':'🎁','Manutenção Casa':'🔧','Impostos/Taxas':'🏛️',Viagem:'✈️','Igreja/Missões':'🙏','Freelance/Extra':'💼',Outros:'📦'})[cat]||'💸';
@@ -1509,6 +1583,11 @@ function renderDebts() {
       <div class="debt-info">
         <div class="debt-name">${d.credor}</div>
         <div class="debt-meta">Juros: ${d.juros}%/mês · Prazo: ${d.prazo||'—'} meses · Prioridade: <span style="color:${prioColor[d.prioridade]}">${d.prioridade}</span></div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+          <button onclick="pagarParcela('${d.id}',${d.parcela})" style="background:rgba(76,175,130,0.15);border:1px solid var(--green);border-radius:6px;padding:4px 10px;color:var(--green);font-size:11px;cursor:pointer;font-weight:600;">✓ Pagar parcela (${fmt(d.parcela)})</button>
+          <span style="font-size:11px;color:var(--text-muted);">ou atualizar saldo:</span>
+          <input type="number" placeholder="novo saldo" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:11px;width:110px;outline:none;" onchange="atualizarSaldoDebt('${d.id}',this.value)">
+        </div>
       </div>
       <div class="debt-values">
         <div class="debt-total">${fmt(d.saldo)}</div>
@@ -1806,6 +1885,69 @@ async function loadPatrimonio() {
 // ============================================================
 // RELATÓRIOS
 // ============================================================
+function setPergunta(texto) {
+  document.getElementById('perguntaInput').value = texto;
+}
+
+async function perguntarIA() {
+  const pergunta = document.getElementById('perguntaInput').value.trim();
+  if (!pergunta) { toast('Digite sua pergunta.', 'error'); return; }
+  const btn = document.getElementById('perguntaBtn');
+  const txt = document.getElementById('perguntaBtnText');
+  const resp = document.getElementById('perguntaResponse');
+  btn.disabled = true;
+  txt.innerHTML = '<span class="spinner"></span>';
+  resp.innerHTML = '⏳ Consultando IA...';
+  resp.classList.add('show');
+
+  // Montar contexto financeiro
+  const income = state.transactions.filter(t=>t.tipo==='receita').reduce((s,t)=>s+t.valor,0);
+  const expense = state.transactions.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+t.valor,0);
+  const cartao = state.transactions.filter(t=>t.tipo==='despesa'&&t.forma_pagto==='Cartão Crédito').reduce((s,t)=>s+t.valor,0);
+  const spentByCat = {};
+  state.transactions.filter(t=>t.tipo==='despesa').forEach(t=>{ spentByCat[t.categoria]=(spentByCat[t.categoria]||0)+t.valor; });
+
+  const contexto = {
+    mes: getMesLabel(),
+    receitas: income,
+    gastos_total: expense,
+    fatura_cartao: cartao,
+    gastos_outros: expense - cartao,
+    saldo_conta: income - (expense - cartao),
+    gastos_por_categoria: spentByCat,
+    orcamento: state.budget,
+    dividas: state.debts.map(d=>({credor:d.credor,saldo:d.saldo,parcela:d.parcela,juros:d.juros})),
+    total_dividas: state.debts.reduce((s,d)=>s+d.saldo,0),
+    reserva_atual: state.reservaAtual||0,
+    despesas_essenciais: state.despesasEssenciais||0,
+  };
+
+  try {
+    const res = await fetch('/.netlify/functions/ia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: `Você é o Mordomo Consciente, conselheiro financeiro cristão e pastoral. 
+O usuário vai fazer uma pergunta sobre seus dados financeiros. Responda de forma direta, precisa e em português brasileiro.
+Use os dados fornecidos para dar uma resposta específica com números reais.
+Seja objetivo mas inclua uma perspectiva pastoral breve no final.
+Formate a resposta em texto corrido, sem JSON. Máximo 200 palavras.`,
+        prompt: `Dados financeiros de ${getMesLabel()}:
+${JSON.stringify(contexto, null, 2)}
+
+Pergunta do usuário: ${pergunta}`
+      })
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d?.error || 'Erro ' + res.status);
+    resp.innerHTML = d.text || 'Sem resposta.';
+  } catch(e) {
+    resp.innerHTML = '⚠️ Erro: ' + e.message;
+  }
+  btn.disabled = false;
+  txt.textContent = '⚡';
+}
+
 async function gerarRelatorio() {
   const btn = document.getElementById('relatorioBtn');
   const txt = document.getElementById('relatorioBtnText');
@@ -1880,7 +2022,7 @@ ${dadosContexto}`
 // ============================================================
 (async () => {
   try {
-    const APP_VERSION = 'v7';
+    const APP_VERSION = 'v8';
     const storedVersion = localStorage.getItem('app_version');
     if (storedVersion !== APP_VERSION) {
       // Nova versão detectada — limpa caches antigos
